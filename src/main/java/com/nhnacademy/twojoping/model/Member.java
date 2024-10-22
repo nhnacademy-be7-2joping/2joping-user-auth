@@ -1,5 +1,6 @@
 package com.nhnacademy.twojoping.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -18,11 +19,11 @@ public class Member {
     @Column(name = "customer_id")
     private Long customerId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_status_id", nullable = false)
     private MemberStatus memberStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_tier_id", nullable = false)
     private MemberTier memberTier;
 
@@ -39,12 +40,15 @@ public class Member {
     private Boolean gender;
 
     @Column(name = "birthday")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthday;
 
     @Column(name = "join_date", nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime joinDate;
 
     @Column(name = "recent_login_date", nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime recentLoginDate;
 
     @Column(name = "is_payco_login", nullable = false)

@@ -27,5 +27,6 @@ public class MemberTier {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_tier_id")
     private Long id;
 }

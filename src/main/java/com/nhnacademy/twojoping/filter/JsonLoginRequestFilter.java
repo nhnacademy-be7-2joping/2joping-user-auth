@@ -2,6 +2,11 @@ package com.nhnacademy.twojoping.filter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.nhnacademy.twojoping.model.Member;
+import com.nhnacademy.twojoping.security.MemberUserDetails;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +18,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.io.IOException;
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class JsonLoginRequestFilter extends UsernamePasswordAuthenticationFilter {
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public JsonLoginRequestFilter() {
+        objectMapper.registerModule(new JavaTimeModule());
+    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -42,5 +50,16 @@ public class JsonLoginRequestFilter extends UsernamePasswordAuthenticationFilter
         }
 
         return super.attemptAuthentication(request, response);
+    }
+
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        // 성공 시에는 member의 정보를 가져온다.
+        MemberUserDetails userDetails = (MemberUserDetails) authResult.getPrincipal();
+        Member member = userDetails.getMember();
+
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_OK);
+        objectMapper.writeValue(response.getWriter(), member);
     }
 }
