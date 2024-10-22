@@ -1,0 +1,7 @@
+POST localhost:8080/login
+Content-Type: application/json
+
+{
+  "id": "user1",
+  "password": "hashedPassword1231"
+}
