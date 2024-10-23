@@ -59,6 +59,7 @@ public class JsonLoginRequestFilter extends UsernamePasswordAuthenticationFilter
         Member member = userDetails.getMember();
 
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
         objectMapper.writeValue(response.getWriter(), member);
     }

@@ -1,7 +1,7 @@
 package com.nhnacademy.twojoping.config;
 
 import com.nhnacademy.twojoping.filter.JsonLoginRequestFilter;
-import com.nhnacademy.twojoping.handler.LoginSuccessHandler;
+import com.nhnacademy.twojoping.handler.MemberLoginFailureHandler;
 import com.nhnacademy.twojoping.security.provider.MemberAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -18,8 +18,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final LoginSuccessHandler loginSuccessHandler;
     private final UserDetailsService userDetailsService;
+    private final MemberLoginFailureHandler memberLoginFailureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager manager) throws Exception {
@@ -35,8 +35,7 @@ public class SecurityConfig {
         http.addFilterBefore(jsonLoginRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         // CSRF 비활성화
-        http.csrf(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable);
+        http.csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
