@@ -1,5 +1,6 @@
-package com.nhnacademy.twojoping.security;
+package com.nhnacademy.twojoping.filter;
 
+import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

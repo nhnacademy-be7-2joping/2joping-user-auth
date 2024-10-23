@@ -1,4 +1,4 @@
-package com.nhnacademy.twojoping.security;
+package com.nhnacademy.twojoping.security.provider;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
