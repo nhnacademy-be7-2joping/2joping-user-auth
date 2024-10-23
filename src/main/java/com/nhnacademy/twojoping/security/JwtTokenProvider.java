@@ -3,12 +3,17 @@ package com.nhnacademy.twojoping.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
@@ -25,8 +30,27 @@ public class JwtTokenProvider {
         return keyGenerator.generateKey();
     }
 
+    public List<GrantedAuthority> getAuthorities(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
+
+        // 권한 정보 추출
+        List<String> roles = (List<String>) claims.get("roles");
+
+        // roles 정보를 GrantedAuthority로 변환
+        if (roles == null) {
+            return new ArrayList<>();
+        }
+
+        return roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+    }
+
     // parameter 1. userId: 사용자의 Id
-    public String generateToken(final String userId) {
+    public String generateToken(final String userId, List<String> roles) {
 
         Claims claims = Jwts.claims().setSubject(String.valueOf(userId));
 
@@ -36,6 +60,7 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setSubject("user")
+                .claim("roles", roles)
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(validity)
