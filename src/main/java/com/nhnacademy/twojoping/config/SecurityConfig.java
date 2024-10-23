@@ -2,6 +2,7 @@ package com.nhnacademy.twojoping.config;
 
 import com.nhnacademy.twojoping.filter.JsonLoginRequestFilter;
 import com.nhnacademy.twojoping.handler.MemberLoginFailureHandler;
+import com.nhnacademy.twojoping.handler.MemberLoginSuccessHandler;
 import com.nhnacademy.twojoping.security.provider.MemberAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final MemberLoginFailureHandler memberLoginFailureHandler;
+    private final MemberLoginSuccessHandler memberLoginSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager manager) throws Exception {
@@ -34,6 +36,7 @@ public class SecurityConfig {
 
         JsonLoginRequestFilter jsonLoginRequestFilter = new JsonLoginRequestFilter();
         jsonLoginRequestFilter.setAuthenticationManager(manager);
+        jsonLoginRequestFilter.setAuthenticationSuccessHandler(memberLoginSuccessHandler);
         jsonLoginRequestFilter.setAuthenticationFailureHandler(memberLoginFailureHandler);
         http.addFilterBefore(jsonLoginRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
