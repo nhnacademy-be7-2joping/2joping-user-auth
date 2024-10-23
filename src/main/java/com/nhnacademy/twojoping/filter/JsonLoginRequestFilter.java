@@ -9,7 +9,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -52,15 +51,10 @@ public class JsonLoginRequestFilter extends UsernamePasswordAuthenticationFilter
         return super.attemptAuthentication(request, response);
     }
 
-    @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        // 성공 시에는 member의 정보를 가져온다.
-        MemberUserDetails userDetails = (MemberUserDetails) authResult.getPrincipal();
-        Member member = userDetails.getMember();
-
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-        objectMapper.writeValue(response.getWriter(), member);
-    }
+//    @Override
+//    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+//                                            FilterChain chain, Authentication authResult) throws IOException,
+//            ServletException {
+//
+//    }
 }
