@@ -3,6 +3,7 @@ package com.nhnacademy.twojoping.config;
 import com.nhnacademy.twojoping.filter.JsonLoginRequestFilter;
 import com.nhnacademy.twojoping.handler.MemberLoginFailureHandler;
 import com.nhnacademy.twojoping.handler.MemberLoginSuccessHandler;
+import com.nhnacademy.twojoping.handler.MemberLogoutSuccessHandler;
 import com.nhnacademy.twojoping.security.provider.MemberAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final MemberLoginFailureHandler memberLoginFailureHandler;
     private final MemberLoginSuccessHandler memberLoginSuccessHandler;
+    private final MemberLogoutSuccessHandler memberLogoutSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager manager) throws Exception {
@@ -42,6 +44,11 @@ public class SecurityConfig {
 
         // CSRF 비활성화
         http.csrf(AbstractHttpConfigurer::disable);
+        http.logout(logout -> {
+            logout.invalidateHttpSession(true)
+                    .deleteCookies("SESSION", "JSESSIONID")
+                    .logoutSuccessHandler(memberLogoutSuccessHandler);
+        });
 
         return http.build();
     }

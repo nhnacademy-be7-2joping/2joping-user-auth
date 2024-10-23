@@ -3,7 +3,7 @@ POST localhost:8080/login
 Content-Type: application/json
 
 {
-  "id": "1",
+  "id": "user1",
   "password": "hashedPassword123"
 }
 
@@ -15,3 +15,6 @@ Content-Type: application/json
   "id": "user1",
   "password": "hashedFail123"
 }
+
+### 로그아웃
+GET localhost:8080/logout
