@@ -1,5 +1,6 @@
 package com.nhnacademy.twojoping.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -8,14 +9,15 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@DiscriminatorColumn
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Inheritance(strategy = InheritanceType.JOINED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "customer_id")
-    private Long id;
+    private Long customerId;
 
     @NotNull
     @Size(max = 20)
@@ -29,4 +31,8 @@ public class Customer {
     @Email
     @Column(unique = true, nullable = false, length = 50)
     private String email;
+
+    @OneToOne(mappedBy = "customer")
+    @JsonIgnore
+    private Member member;
 }

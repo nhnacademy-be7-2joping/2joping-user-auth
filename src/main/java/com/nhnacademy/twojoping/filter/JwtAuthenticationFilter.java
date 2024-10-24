@@ -33,24 +33,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         setFilterProcessesUrl("/login");
     }
 
-//    @Override
-//    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-//            throws ServletException, IOException {
-//        String token = getTokenFromRequest(request);
-//
-//        if (!request.getRequestURI().equals("/login")) {
-//            if (token != null && !jwtTokenProvider.isTokenExpired(token)) {
-//                List<GrantedAuthority> authorities = jwtTokenProvider.getAuthorities(token);
-//                String username = jwtTokenProvider.getUsername(token);
-//                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, null, authorities);
-//                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//                SecurityContextHolder.getContext().setAuthentication(authentication);
-//            }
-//        }
-//
-//        chain.doFilter(request, response);
-//    }
-
     @Override
     public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response)
             throws AuthenticationException {

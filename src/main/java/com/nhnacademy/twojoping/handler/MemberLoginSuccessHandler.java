@@ -1,8 +1,7 @@
 package com.nhnacademy.twojoping.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhnacademy.twojoping.model.Member;
-import com.nhnacademy.twojoping.security.MemberUserDetails;
+import com.nhnacademy.twojoping.dto.LoginResDto;
 import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -12,7 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -34,8 +34,12 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         // 성공 시에는 member의 정보를 가져온다.
-        MemberUserDetails userDetails = (MemberUserDetails) authentication.getPrincipal();
-        Member member = userDetails.getMember();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String id = userDetails.getUsername();
+        String role = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse(
+                "ROLE_MEMBER");
+
+        LoginResDto resDto = new LoginResDto(id, role, "");
 
         // JWT 토큰 발급
         String token = jwtTokenProvider.generateToken(authentication);
@@ -45,7 +49,7 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
-        objectMapper.writeValue(response.getWriter(), member);
+        objectMapper.writeValue(response.getWriter(), resDto);
 
         // Redis session id 생성
         String redisSessionId = UUID.randomUUID().toString();
@@ -55,7 +59,7 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         response.addCookie(cookie);
         // redis session에 인증한 사용자의 정보 넣기
-        redisTemplate.opsForHash().put(SESSION_HASH_NAME, redisSessionId, member.getCustomerId());
+        redisTemplate.opsForHash().put(SESSION_HASH_NAME, redisSessionId, id);
         super.onAuthenticationSuccess(request, response, authentication);
     }
 }

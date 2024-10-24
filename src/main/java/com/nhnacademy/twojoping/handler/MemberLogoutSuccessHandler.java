@@ -36,6 +36,6 @@ public class MemberLogoutSuccessHandler implements LogoutSuccessHandler {
             redisTemplate.opsForHash().delete(SESSION_HASH_NAME, redisSessionId);
         }
 
-        response.setStatus(HttpServletResponse.SC_OK);
+        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 }

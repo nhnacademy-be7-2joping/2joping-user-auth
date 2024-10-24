@@ -7,6 +7,8 @@ import com.nhnacademy.twojoping.handler.MemberLoginSuccessHandler;
 import com.nhnacademy.twojoping.handler.MemberLogoutSuccessHandler;
 import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
 import com.nhnacademy.twojoping.security.provider.MemberAuthenticationProvider;
+import com.nhnacademy.twojoping.service.AdminUserDetailService;
+import com.nhnacademy.twojoping.service.MemberUserDetailService;
 import jakarta.servlet.Filter;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +29,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 @Slf4j
 public class SecurityConfig {
-    private final UserDetailsService userDetailsService;
+    // User detail services
+    private final MemberUserDetailService memberUserDetailService;
+    private final AdminUserDetailService adminUserDetailService;
+
     private final MemberLoginFailureHandler memberLoginFailureHandler;
     private final MemberLoginSuccessHandler memberLoginSuccessHandler;
     private final MemberLogoutSuccessHandler memberLogoutSuccessHandler;
@@ -79,6 +84,6 @@ public class SecurityConfig {
 
     @Bean
     public MemberAuthenticationProvider memberAuthenticationProvider(PasswordEncoder passwordEncoder) {
-        return new MemberAuthenticationProvider(userDetailsService, passwordEncoder);
+        return new MemberAuthenticationProvider(memberUserDetailService, adminUserDetailService, passwordEncoder);
     }
 }
