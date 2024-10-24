@@ -23,10 +23,8 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
     private final ObjectMapper objectMapper;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final String SESSION_HASH_NAME = "sessions:";
-    private final int THREE_DAYS_IN_SECONDS = 259200;
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -37,25 +35,19 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         MemberUserDetails userDetails = (MemberUserDetails) authentication.getPrincipal();
         Member member = userDetails.getMember();
 
-        // JWT 토큰 발급
+        // JWT 토큰 발급후 쿠키에 추가
         String token = jwtTokenProvider.generateToken(authentication);
-        response.setHeader("Authorization", "Bearer " + token);
+        Cookie cookie = new Cookie("JWT", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        response.addCookie(cookie);
 
-        // session에 사용자의 customer id 넣기
+        // response
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
         objectMapper.writeValue(response.getWriter(), member);
-
-        // Redis session id 생성
-        String redisSessionId = UUID.randomUUID().toString();
-        Cookie cookie = new Cookie("SESSION", redisSessionId);
-        cookie.setPath("/");
-        cookie.setMaxAge(THREE_DAYS_IN_SECONDS); // 3일
-
-        response.addCookie(cookie);
-        // redis session에 인증한 사용자의 정보 넣기
-        redisTemplate.opsForHash().put(SESSION_HASH_NAME, redisSessionId, member.getCustomerId());
         super.onAuthenticationSuccess(request, response, authentication);
     }
 }

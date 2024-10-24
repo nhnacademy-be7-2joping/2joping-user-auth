@@ -5,7 +5,9 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,11 +23,13 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
 
-    private final String secretKey;
-    private final long validityInMilliseconds = 3600000;
+    @Value("${jwt.secret-key}")
+    private String secretKey;
+
+    @Value("${jwt.validity-in-milliseconds}")
+    private long validityInMilliseconds;
 
     public JwtTokenProvider() throws NoSuchAlgorithmException {
-        this.secretKey = "abcdefggfojnrvepoinjftgbpinergpoijasdfasdfasfwaeoesjngsoernsrnbsortinborsibnrsotinbsortibsorinbsornbsornbrsotibnrsotibnrsobsrotibnsortibnsortinbsoritbosritbsortibsortinbn";
     }
 
     // JWT 토큰 발급
@@ -44,8 +48,36 @@ public class JwtTokenProvider {
                 .setSubject(username)
                 .setIssuedAt(now)
                 .setExpiration(validity)
+                .setId(UUID.randomUUID().toString())
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
+    }
+
+    // 쿠키에서 토큰 추출
+    public String resolveToken(HttpServletRequest request) {
+        // 쿠키에서 JWT 추출
+        Cookie[] cookies = request.getCookies();
+        String token = "";
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("JWT".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                }
+            }
+        }
+
+        return token;
+    }
+
+    // TTL 반환
+    public long getRemainingExpirationTime(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
+
+        long expirationTime = claims.getExpiration().getTime();
+        return expirationTime - System.currentTimeMillis(); // 남은 유효 시간 반환
     }
 
     // 헤더에서 토큰 추출
@@ -55,6 +87,15 @@ public class JwtTokenProvider {
             return bearerToken.substring(7);
         }
         return null;
+    }
+
+    // JTI(JWT 고유 아이디) 추출
+    public String getJti(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody()
+                .getId();
     }
 
     // 토큰에서 사용자 id 추출
