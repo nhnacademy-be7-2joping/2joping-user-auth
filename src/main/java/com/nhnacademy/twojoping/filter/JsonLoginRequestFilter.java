@@ -51,10 +51,4 @@ public class JsonLoginRequestFilter extends UsernamePasswordAuthenticationFilter
         return super.attemptAuthentication(request, response);
     }
 
-//    @Override
-//    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-//                                            FilterChain chain, Authentication authResult) throws IOException,
-//            ServletException {
-//
-//    }
 }

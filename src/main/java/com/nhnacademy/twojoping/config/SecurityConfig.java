@@ -31,7 +31,6 @@ public class SecurityConfig {
     private final MemberLoginFailureHandler memberLoginFailureHandler;
     private final MemberLoginSuccessHandler memberLoginSuccessHandler;
     private final MemberLogoutSuccessHandler memberLogoutSuccessHandler;
-
     private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
@@ -49,8 +48,8 @@ public class SecurityConfig {
         jsonLoginRequestFilter.setAuthenticationFailureHandler(memberLoginFailureHandler);
         http.addFilterBefore(jsonLoginRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // JwtAuthenticationFilter 설정 (AuthenticationManager가 준비된 후 추가)
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(manager, jwtTokenProvider);
+        // JwtAuthenticationFilter
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider);
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 

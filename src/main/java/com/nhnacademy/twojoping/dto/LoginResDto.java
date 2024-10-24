@@ -1,13 +1,10 @@
 package com.nhnacademy.twojoping.dto;
 
 import com.nhnacademy.twojoping.model.Member;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
-@Getter
-public class LoginResDto {
-    private Member member; // 사용자 정보
-    private String token;  // JWT 토큰
-}
+
+public record LoginResDto (@NotBlank Member member, @NotBlank String token) {}
 
