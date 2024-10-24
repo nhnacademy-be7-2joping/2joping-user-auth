@@ -1,12 +1,17 @@
 package com.nhnacademy.twojoping.config;
 
 import com.nhnacademy.twojoping.filter.JsonLoginRequestFilter;
+import com.nhnacademy.twojoping.filter.JwtAuthenticationFilter;
 import com.nhnacademy.twojoping.handler.MemberLoginFailureHandler;
 import com.nhnacademy.twojoping.handler.MemberLoginSuccessHandler;
 import com.nhnacademy.twojoping.handler.MemberLogoutSuccessHandler;
+import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
 import com.nhnacademy.twojoping.security.provider.MemberAuthenticationProvider;
+import jakarta.servlet.Filter;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +32,8 @@ public class SecurityConfig {
     private final MemberLoginSuccessHandler memberLoginSuccessHandler;
     private final MemberLogoutSuccessHandler memberLogoutSuccessHandler;
 
+    private final JwtTokenProvider jwtTokenProvider;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager manager) throws Exception {
         http.authorizeHttpRequests(
@@ -46,6 +53,11 @@ public class SecurityConfig {
         jsonLoginRequestFilter.setAuthenticationSuccessHandler(memberLoginSuccessHandler);
         jsonLoginRequestFilter.setAuthenticationFailureHandler(memberLoginFailureHandler);
         http.addFilterBefore(jsonLoginRequestFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // JwtAuthenticationFilter 설정 (AuthenticationManager가 준비된 후 추가)
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(manager, jwtTokenProvider);
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
 
         // CSRF 비활성화
         http.csrf(AbstractHttpConfigurer::disable);

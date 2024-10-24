@@ -1,6 +1,5 @@
 package com.nhnacademy.twojoping.controller;
 
-import com.nhnacademy.twojoping.dto.LoginNonMemberReqDto;
 import com.nhnacademy.twojoping.dto.LoginReqDto;
 import com.nhnacademy.twojoping.dto.LoginResDto;
 import com.nhnacademy.twojoping.model.Member;
