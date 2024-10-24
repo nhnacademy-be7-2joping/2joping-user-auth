@@ -9,7 +9,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@DiscriminatorColumn
 @Entity
 @Getter
 @Inheritance(strategy = InheritanceType.JOINED)

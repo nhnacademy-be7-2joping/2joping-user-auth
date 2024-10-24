@@ -1,6 +1,5 @@
 package com.nhnacademy.twojoping.dto;
 
-import com.nhnacademy.twojoping.model.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -28,14 +28,3 @@ Content-Type: application/json
 ### 로그아웃
 GET localhost:8080/logout
 Cookie: SESSION=ce731581-319a-40ab-ace7-c5ac3bf72fdf
-
-### 비회원 로그인
-POST localhost:8080/login/non-member
-Content-Type: application/json
-
-{
-  "name": "이승준",
-  "password": "12345",
-  "phone": "01012345678",
-  "email": "lsj457@naver.com"
-}

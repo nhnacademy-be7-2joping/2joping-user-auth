@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Getter
 public class Admin {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long adminId;
 
     @Column(length = 20, unique = true, nullable = false)
