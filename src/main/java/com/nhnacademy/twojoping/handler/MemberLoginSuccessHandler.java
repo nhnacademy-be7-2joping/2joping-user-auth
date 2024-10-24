@@ -1,7 +1,7 @@
 package com.nhnacademy.twojoping.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhnacademy.twojoping.dto.LoginResDto;
+import com.nhnacademy.twojoping.dto.LoginResponseDto;
 import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -39,7 +39,7 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String role = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse(
                 "ROLE_MEMBER");
 
-        LoginResDto resDto = new LoginResDto(id, role, "");
+        LoginResponseDto resDto = new LoginResponseDto(id, role, "");
 
         // JWT 토큰 발급
         String token = jwtTokenProvider.generateToken(authentication);
