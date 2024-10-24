@@ -30,7 +30,6 @@ public class MemberLogoutSuccessHandler implements LogoutSuccessHandler {
 
         //쿠키에서 토큰 추출
         String token = jwtTokenProvider.resolveToken(request);
-
         if (token != null && jwtTokenProvider.validateToken(token)) {
             // 토큰의 남은 유효 시간 계산
             long expiration = jwtTokenProvider.getRemainingExpirationTime(token);
@@ -39,6 +38,14 @@ public class MemberLogoutSuccessHandler implements LogoutSuccessHandler {
             // Redis에 블랙리스트로 추가하고, 남은 시간 동안 저장
             redisTemplate.opsForValue().set(jti, "blacklisted", expiration, TimeUnit.MILLISECONDS);
         }
+
+        // 쿠키 삭제
+        Cookie cookie = new Cookie("JWT", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
 
         response.setStatus(HttpServletResponse.SC_OK);
     }
