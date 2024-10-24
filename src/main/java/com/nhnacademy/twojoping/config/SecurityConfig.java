@@ -31,7 +31,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager manager) throws Exception {
         http.authorizeHttpRequests(
                 request -> {
-                    request.requestMatchers("/login/**", "/login", "/", "/error/**").permitAll()
+                    request.requestMatchers("/login/**", "/login", "/", "/error/**",
+                                            "/api/v1/auth/**",
+                                            "/swagger-ui/**",
+                                            "/swagger-resources/**",
+                                            "/v3/api-docs/**"
+                            ).permitAll()
                             .anyRequest().authenticated();
                 }
         );

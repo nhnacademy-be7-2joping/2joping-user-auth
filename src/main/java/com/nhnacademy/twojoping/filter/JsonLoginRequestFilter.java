@@ -3,10 +3,6 @@ package com.nhnacademy.twojoping.filter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.nhnacademy.twojoping.model.Member;
-import com.nhnacademy.twojoping.security.MemberUserDetails;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -50,11 +46,4 @@ public class JsonLoginRequestFilter extends UsernamePasswordAuthenticationFilter
 
         return super.attemptAuthentication(request, response);
     }
-
-//    @Override
-//    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-//                                            FilterChain chain, Authentication authResult) throws IOException,
-//            ServletException {
-//
-//    }
 }

@@ -1,5 +1,6 @@
 package com.nhnacademy.twojoping.controller;
 
+import com.nhnacademy.twojoping.dto.LoginNonMemberReqDto;
 import com.nhnacademy.twojoping.dto.LoginReqDto;
 import com.nhnacademy.twojoping.dto.LoginResDto;
 import com.nhnacademy.twojoping.model.Member;
@@ -35,5 +36,10 @@ public class LoginController {
         LoginResDto loginResDto = new LoginResDto(details.getMember(), token);
 
         return ResponseEntity.ok(loginResDto);
+    }
+
+    @PostMapping("/login/non-member")
+    public ResponseEntity<LoginResDto> doLoginNonMember(@RequestBody LoginNonMemberReqDto nonMemberReqDto) {
+        return ResponseEntity.ok().build();
     }
 }
