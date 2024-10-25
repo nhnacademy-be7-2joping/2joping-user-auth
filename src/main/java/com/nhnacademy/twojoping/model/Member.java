@@ -1,6 +1,7 @@
 package com.nhnacademy.twojoping.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -10,15 +11,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Entity
 @Getter
-public class Member {
-    @Id
-    @Column(name = "customer_id")
-    private Long customerId;
-
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Member extends Customer {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_status_id", nullable = false)
     private MemberStatus memberStatus;
@@ -59,4 +56,9 @@ public class Member {
 
     @Column(name = "acc_purchase", nullable = false, columnDefinition = "INT DEFAULT 0")
     private int accPurchase;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    @JsonIgnore
+    Customer customer;
 }

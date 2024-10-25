@@ -1,31 +1,24 @@
 package com.nhnacademy.twojoping.service;
 
-import com.nhnacademy.twojoping.exception.MemberNotFoundException;
+import com.nhnacademy.twojoping.common.security.AbstractUserDetailService;
 import com.nhnacademy.twojoping.model.Member;
 import com.nhnacademy.twojoping.security.MemberUserDetails;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
-@Component
-public class MemberUserDetailService implements UserDetailsService {
-    private final PasswordEncoder passwordEncoder;
+@Service
+public class MemberUserDetailService extends AbstractUserDetailService<Member> {
     private final MemberService memberService;
 
     @Override
-    public MemberUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        try {
-            Member member = memberService.getMember(username);
-            if (member == null) {
-                throw new MemberNotFoundException(username);
-            }
+    protected Member findUser(String username) {
+        return memberService.getMember(username);
+    }
 
-            return new MemberUserDetails(member);
-        } catch (MemberNotFoundException e) {
-            throw new UsernameNotFoundException(e.getMessage());
-        }
+    @Override
+    protected UserDetails createUserDetails(Member user) {
+        return new MemberUserDetails(user);
     }
 }
