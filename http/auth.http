@@ -3,8 +3,17 @@ POST localhost:8080/login
 Content-Type: application/json
 
 {
-  "id": "1",
+  "id": "user1",
   "password": "hashedPassword123"
+}
+
+### 관리자 로그인
+POST localhost:8080/login
+Content-Type: application/json
+
+{
+  "id": "admin",
+  "password": "12345"
 }
 
 ### 로그인 실패 요청
@@ -15,3 +24,7 @@ Content-Type: application/json
   "id": "user1",
   "password": "hashedFail123"
 }
+
+### 로그아웃
+GET localhost:8080/logout
+Cookie: SESSION=ce731581-319a-40ab-ace7-c5ac3bf72fdf

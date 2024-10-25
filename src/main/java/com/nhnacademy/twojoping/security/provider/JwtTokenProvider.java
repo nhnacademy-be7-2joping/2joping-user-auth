@@ -3,6 +3,7 @@ package com.nhnacademy.twojoping.security.provider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -18,16 +19,11 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
 
-    private final SecretKey secretKey;
+    private final String secretKey;
+    private final long validityInMilliseconds = 3600000;
 
     public JwtTokenProvider() throws NoSuchAlgorithmException {
-        this.secretKey = generateSecretKey();
-    }
-
-    public static SecretKey generateSecretKey() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(256);
-        return keyGenerator.generateKey();
+        this.secretKey = "abcdefggfojnrvepoinjftgbpinergpoijasdfasdfasfwaeoesjngsoernsrnbsortinborsibnrsotinbsortibsorinbsornbsornbrsotibnrsotibnrsobsrotibnsortibnsortinbsoritbosritbsortibsortinbn";
     }
 
     public List<GrantedAuthority> getAuthorities(String token) {
@@ -50,21 +46,16 @@ public class JwtTokenProvider {
     }
 
     // parameter 1. userId: 사용자의 Id
-    public String generateToken(final String userId, List<String> roles) {
-
-        Claims claims = Jwts.claims().setSubject(String.valueOf(userId));
-
+    public String generateToken(Authentication authentication) {
+        String username = authentication.getName();
         Date now = new Date();
-        long tokenValidityInSeconds = 3600 * 1000;
-        Date validity = new Date(now.getTime() + tokenValidityInSeconds);
+        Date validity = new Date(now.getTime() + validityInMilliseconds);
 
         return Jwts.builder()
-                .setSubject("user")
-                .claim("roles", roles)
-                .setClaims(claims)
+                .setSubject(username)
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
