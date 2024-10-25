@@ -39,7 +39,7 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String token = jwtTokenProvider.generateToken(authentication);
         Cookie cookie = new Cookie("JWT", token);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false);
         cookie.setPath("/");
         response.addCookie(cookie);
 
