@@ -46,4 +46,5 @@ public class JsonLoginRequestFilter extends UsernamePasswordAuthenticationFilter
 
         return super.attemptAuthentication(request, response);
     }
+
 }

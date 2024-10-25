@@ -21,44 +21,25 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
-public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final AuthenticationManager authenticationManager;
 
-    public JwtAuthenticationFilter(final AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
-
+    public JwtAuthenticationFilter(final JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
-        this.authenticationManager = authenticationManager;
-        setFilterProcessesUrl("/login");
     }
 
+    // 요청시 마다 토큰 검증, 유효시엔 인증 정보 SecurityContext에 저장.
     @Override
-    public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response)
-            throws AuthenticationException {
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
+    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
+            throws ServletException, IOException {
+        String jwtToken = jwtTokenProvider.getTokenFromRequest(request);
 
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
-
-        return authenticationManager.authenticate(authenticationToken);
-    }
-
-    @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                            FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        // 인증 성공 시 JWT 토큰 발급
-        String token = jwtTokenProvider.generateToken(authResult);
-
-        // 토큰을 응답 헤더에 추가
-        response.addHeader("Authorization", "Bearer " + token);
-    }
-
-    private String getTokenFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        if (jwtToken != null & jwtTokenProvider.validateToken(jwtToken)) {
+            Authentication authentication = jwtTokenProvider.getAuthentication(jwtToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
-        return null;
+
+        filterChain.doFilter(request, response);
     }
 }
