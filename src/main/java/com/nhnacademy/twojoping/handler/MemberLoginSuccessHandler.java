@@ -1,6 +1,7 @@
 package com.nhnacademy.twojoping.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhnacademy.twojoping.common.security.UserDetailsWithId;
 import com.nhnacademy.twojoping.dto.LoginResponseDto;
 import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
 import jakarta.servlet.ServletException;
@@ -34,12 +35,13 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         // 성공 시에는 member의 정보를 가져온다.
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserDetailsWithId userDetails = (UserDetailsWithId) authentication.getPrincipal();
+        Long customerId = userDetails.getId();
         String id = userDetails.getUsername();
         String role = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse(
                 "ROLE_MEMBER");
 
-        LoginResponseDto resDto = new LoginResponseDto(id, role, "");
+        LoginResponseDto resDto = new LoginResponseDto(customerId, id, role, "");
 
         // JWT 토큰 발급
         String token = jwtTokenProvider.generateToken(authentication);

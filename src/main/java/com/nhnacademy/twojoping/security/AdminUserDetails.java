@@ -1,16 +1,16 @@
 package com.nhnacademy.twojoping.security;
 
+import com.nhnacademy.twojoping.common.security.UserDetailsWithId;
 import com.nhnacademy.twojoping.model.Admin;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 
-public class AdminUserDetails implements UserDetails {
+public class AdminUserDetails implements UserDetailsWithId {
     private final Collection<SimpleGrantedAuthority> authorities;
     @Getter
     private final Admin admin;
@@ -34,5 +34,10 @@ public class AdminUserDetails implements UserDetails {
     @Override
     public String getUsername() {
         return admin.getId();
+    }
+
+    @Override
+    public Long getId() {
+        return admin.getAdminId();
     }
 }

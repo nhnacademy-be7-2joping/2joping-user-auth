@@ -1,5 +1,6 @@
 package com.nhnacademy.twojoping.security;
 
+import com.nhnacademy.twojoping.common.security.UserDetailsWithId;
 import com.nhnacademy.twojoping.model.Member;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -9,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class MemberUserDetails implements UserDetails {
+public class MemberUserDetails implements UserDetailsWithId {
     @Getter
     private Member member;
     private final Collection<SimpleGrantedAuthority> authorities;
@@ -36,4 +37,8 @@ public class MemberUserDetails implements UserDetails {
         return member.getId();
     }
 
+    @Override
+    public Long getId() {
+        return member.getCustomerId();
+    }
 }
