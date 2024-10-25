@@ -27,7 +27,7 @@ public class Member extends Customer {
     @Column(name = "nickname", length = 20, nullable = false)
     private String nickname;
 
-    @Column(name = "id", length = 20, nullable = false, unique = true)
+    @Column(name = "login_id", length = 20, nullable = false, unique = true)
     private String id;
 
     @Column(name = "password", length = 255, nullable = false)

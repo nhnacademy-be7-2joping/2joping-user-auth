@@ -1,6 +1,8 @@
 package com.nhnacademy.twojoping.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhnacademy.twojoping.common.security.UserDetailsWithId;
+import com.nhnacademy.twojoping.dto.LoginResponseDto;
 import com.nhnacademy.twojoping.model.Member;
 import com.nhnacademy.twojoping.security.MemberUserDetails;
 import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
@@ -12,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -31,9 +34,14 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
-        // 성공 시에는 member의 정보를 가져온다.
-        MemberUserDetails userDetails = (MemberUserDetails) authentication.getPrincipal();
-        Member member = userDetails.getMember();
+        // 성공 시에는 사용자의 정보를 가져온다.
+        UserDetailsWithId userDetails = (UserDetailsWithId) authentication.getPrincipal();
+        Long customerId = userDetails.getId();
+        String id = userDetails.getUsername();
+        String role = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse(
+                "ROLE_MEMBER");
+
+        LoginResponseDto resDto = new LoginResponseDto(customerId, id, role, "");
 
         // JWT 토큰 발급후 쿠키에 추가
         String token = jwtTokenProvider.generateToken(authentication);
@@ -47,7 +55,7 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
-        objectMapper.writeValue(response.getWriter(), member);
+        objectMapper.writeValue(response.getWriter(), resDto);
         super.onAuthenticationSuccess(request, response, authentication);
     }
 }
