@@ -12,7 +12,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
 
     public Member getMember(String username) {
-        return memberRepository.findByid(username).orElseThrow(
+        return memberRepository.findById(username).orElseThrow(
                 () -> new MemberNotFoundException(username)
         );
     }
