@@ -47,6 +47,6 @@ public class MemberLogoutSuccessHandler implements LogoutSuccessHandler {
         cookie.setMaxAge(0);
         response.addCookie(cookie);
 
-        response.setStatus(HttpServletResponse.SC_OK);
+        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 }
