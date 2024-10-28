@@ -38,18 +38,25 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         UserDetailsWithId userDetails = (UserDetailsWithId) authentication.getPrincipal();
         Long customerId = userDetails.getId();
         String id = userDetails.getUsername();
-        String role = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse(
-                "ROLE_MEMBER");
 
-        LoginResponseDto resDto = new LoginResponseDto(customerId, id, role, "");
+        LoginResponseDto resDto = new LoginResponseDto(customerId, id);
 
         // JWT 토큰 발급후 쿠키에 추가
-        String token = jwtTokenProvider.generateToken(authentication);
-        Cookie cookie = new Cookie("JWT", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        response.addCookie(cookie);
+        // 액세스 토큰
+        String token = jwtTokenProvider.generateAccessToken(authentication);
+        Cookie accessTokenCookie = new Cookie("accessToken", token);
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setSecure(false);
+        accessTokenCookie.setPath("/");
+        response.addCookie(accessTokenCookie);
+
+        // 리프레시 토큰
+        token = jwtTokenProvider.generateRefreshToken(authentication);
+        Cookie refreshCookie = new Cookie("refreshToken", token);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(false);
+        refreshCookie.setPath("/");
+        response.addCookie(refreshCookie);
 
         // response
         response.setContentType("application/json");

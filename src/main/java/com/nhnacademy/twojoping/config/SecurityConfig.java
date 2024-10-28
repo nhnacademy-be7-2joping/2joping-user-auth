@@ -1,7 +1,6 @@
 package com.nhnacademy.twojoping.config;
 
 import com.nhnacademy.twojoping.filter.JsonLoginRequestFilter;
-import com.nhnacademy.twojoping.filter.JwtAuthenticationFilter;
 import com.nhnacademy.twojoping.handler.MemberLoginFailureHandler;
 import com.nhnacademy.twojoping.handler.MemberLoginSuccessHandler;
 import com.nhnacademy.twojoping.handler.MemberLogoutSuccessHandler;
@@ -9,18 +8,14 @@ import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
 import com.nhnacademy.twojoping.security.provider.MemberAuthenticationProvider;
 import com.nhnacademy.twojoping.service.AdminUserDetailService;
 import com.nhnacademy.twojoping.service.MemberUserDetailService;
-import jakarta.servlet.Filter;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -46,7 +41,8 @@ public class SecurityConfig {
                                             "/api/v1/auth/**",
                                             "/swagger-ui/**",
                                             "/swagger-resources/**",
-                                            "/v3/api-docs/**"
+                                            "/v3/api-docs/**",
+                                            "/auth/refreshToken"
                             ).permitAll()
                             .anyRequest().authenticated();
                 }
@@ -59,8 +55,8 @@ public class SecurityConfig {
         http.addFilterBefore(jsonLoginRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         // JwtAuthenticationFilter
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider);
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+//        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider);
+//        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 
         // CSRF 비활성화

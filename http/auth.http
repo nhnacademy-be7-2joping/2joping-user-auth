@@ -27,4 +27,8 @@ Content-Type: application/json
 
 ### 로그아웃
 GET localhost:8080/logout
-Cookie: SESSION=ce731581-319a-40ab-ace7-c5ac3bf72fdf
+
+### 토큰 재발급 요청
+GET localhost:8080/auth/refreshToken
+
+### 프론트에서 로그인 완료시 다시 로그아웃후 로그인이 가능하도록 처리 해야함.
