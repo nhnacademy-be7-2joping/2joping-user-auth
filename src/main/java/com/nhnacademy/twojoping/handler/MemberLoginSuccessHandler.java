@@ -33,8 +33,6 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         UserDetailsWithId userDetails = (UserDetailsWithId) authentication.getPrincipal();
         Long customerId = userDetails.getId();
         String id = userDetails.getUsername();
-        String role = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse(
-                "ROLE_MEMBER");
 
         LoginResponseDto resDto = new LoginResponseDto(customerId, id);
 
@@ -50,7 +48,7 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
-        objectMapper.writeValue(response.getWriter(), resDto);
+        objectMapper.writeValue(response.getWriter(), member);
         super.onAuthenticationSuccess(request, response, authentication);
     }
 }
