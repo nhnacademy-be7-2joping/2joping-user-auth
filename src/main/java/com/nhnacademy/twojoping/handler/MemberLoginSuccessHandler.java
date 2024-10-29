@@ -36,7 +36,7 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String role = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse(
                 "ROLE_MEMBER");
 
-        LoginResponseDto resDto = new LoginResponseDto(customerId, id, role, "");
+        LoginResponseDto resDto = new LoginResponseDto(customerId, id);
 
         // JWT 토큰 발급후 쿠키에 추가
         String token = jwtTokenProvider.generateToken(authentication);
