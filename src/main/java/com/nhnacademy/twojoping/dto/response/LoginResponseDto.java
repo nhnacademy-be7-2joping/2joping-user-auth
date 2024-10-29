@@ -1,4 +1,4 @@
-package com.nhnacademy.twojoping.dto;
+package com.nhnacademy.twojoping.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +8,5 @@ import lombok.Getter;
 public class LoginResponseDto {
     private Long customerId; // 고객 ID
     private String id; // 사용자 정보
-    private String role; // 사용자 권한 (ROLE_MEMBER || ROLE_ADMIN)
-    private String token;  // JWT 토큰
 }
 

@@ -1,14 +1,13 @@
 package com.nhnacademy.twojoping.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhnacademy.twojoping.dto.ErrorDto;
+import com.nhnacademy.twojoping.dto.response.ErrorDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 

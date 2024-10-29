@@ -27,4 +27,3 @@ Content-Type: application/json
 
 ### 로그아웃
 GET localhost:8080/logout
-Cookie: SESSION=ce731581-319a-40ab-ace7-c5ac3bf72fdf
