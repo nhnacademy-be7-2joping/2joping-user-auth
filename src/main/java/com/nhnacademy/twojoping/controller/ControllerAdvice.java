@@ -1,6 +1,7 @@
 package com.nhnacademy.twojoping.controller;
 
 import com.nhnacademy.twojoping.dto.response.ErrorDto;
+import com.nhnacademy.twojoping.exception.InvalidRefreshToken;
 import com.nhnacademy.twojoping.exception.MemberNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,5 +21,11 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorDto> badCredentials(BadCredentialsException e) {
         ErrorDto errorDto = new ErrorDto(401, "Unauthorized", e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDto);
+    }
+
+    @ExceptionHandler({InvalidRefreshToken.class})
+    public ResponseEntity<ErrorDto> invalidRefreshToken(InvalidRefreshToken e) {
+        ErrorDto errorDto = new ErrorDto(403, "Invalid Refresh Token", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorDto);
     }
 }

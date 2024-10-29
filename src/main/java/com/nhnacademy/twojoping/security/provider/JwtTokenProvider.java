@@ -1,10 +1,8 @@
 package com.nhnacademy.twojoping.security.provider;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +12,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,17 +22,21 @@ public class JwtTokenProvider {
     @Value("${jwt.secret-key}")
     private String secretKey;
 
-    @Value("${jwt.validity-in-milliseconds}")
-    private long validityInMilliseconds;
+    @Value("${jwt.accessToken-validity-in-milliseconds}")
+    private long accessTokenValidity;
+
+    @Value("${jwt.refreshToken-validity-in-milliseconds}")
+    private long refreshTokenValidity;
+
 
     public JwtTokenProvider() throws NoSuchAlgorithmException {
     }
 
-    // JWT 토큰 발급
-    public String generateToken(Authentication authentication) {
+    // JWT 액세스 토큰 발급
+    public String generateAccessToken(Authentication authentication) {
         String username = authentication.getName();
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        Date validity = new Date(now.getTime() + accessTokenValidity);
 
         Map<String, Object> header = new HashMap<>();
         header.put("typ", "JWT");
@@ -46,6 +46,63 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setHeader(header)
                 .setSubject(username)
+                .claim("role", authentication
+                        .getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.joining(",")))
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .setId(UUID.randomUUID().toString())
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
+    }
+
+    // refreshToken 을 통한 accessToken 재발급
+    public String regenerateAccessToken(String refreshToken) {
+        Authentication authentication = getAuthentication(refreshToken);
+        String username = authentication.getName();
+
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + refreshTokenValidity);
+        Map<String, Object> header = new HashMap<>();
+        header.put("typ", "JWT");
+        header.put("alg", "HS256");
+
+        return Jwts.builder()
+                .setHeader(header)
+                .setSubject(username)
+                .claim("role", authentication
+                        .getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.joining(",")))
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .setId(UUID.randomUUID().toString())
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
+    }
+
+    // JWT 리프레시 토큰 발급
+    public String generateRefreshToken(Authentication authentication) {
+        String username = authentication.getName();
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + refreshTokenValidity);
+
+        Map<String, Object> header = new HashMap<>();
+        header.put("typ", "JWT");
+        header.put("alg", "HS256");
+
+
+        return Jwts.builder()
+                .setHeader(header)
+                .setSubject(username)
+                .claim("role", authentication
+                        .getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.joining(",")))
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .setId(UUID.randomUUID().toString())
@@ -54,19 +111,23 @@ public class JwtTokenProvider {
     }
 
     // 쿠키에서 토큰 추출
-    public String resolveToken(HttpServletRequest request) {
+    public List<String> resolveToken(HttpServletRequest request) {
         // 쿠키에서 JWT 추출
         Cookie[] cookies = request.getCookies();
-        String token = "";
+        String accessToken = "";
+        String refreshToken = "";
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("JWT".equals(cookie.getName())) {
-                    token = cookie.getValue();
+                if ("accessToken".equals(cookie.getName())) {
+                    accessToken = cookie.getValue();
+                }
+                if ("refreshToken".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
                 }
             }
         }
 
-        return token;
+        return List.of(accessToken, refreshToken);
     }
 
     // TTL 반환
@@ -78,15 +139,6 @@ public class JwtTokenProvider {
 
         long expirationTime = claims.getExpiration().getTime();
         return expirationTime - System.currentTimeMillis(); // 남은 유효 시간 반환
-    }
-
-    // 헤더에서 토큰 추출
-    public String getTokenFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-        return null;
     }
 
     // JTI(JWT 고유 아이디) 추출
@@ -116,7 +168,7 @@ public class JwtTokenProvider {
                         .setSigningKey(secretKey)
                         .parseClaimsJws(token)
                         .getBody()
-                        .get("roles", String.class)
+                        .get("role", String.class)
                         .split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
