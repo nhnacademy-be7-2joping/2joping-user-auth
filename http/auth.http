@@ -32,3 +32,7 @@ GET localhost:8080/logout
 GET localhost:8080/auth/refreshToken
 
 ### 프론트에서 로그인 완료시 다시 로그아웃후 로그인이 가능하도록 처리 해야함.
+
+### 토큰에서 정보 가져오기
+GET localhost:8080/auth/user-info
+Cookie: accessToken=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMSIsInJvbGUiOiJST0xFX01FTUJFUiIsImlhdCI6MTczMDM1NTU3OSwiZXhwIjoxNzMwMzU2NDc5LCJqdGkiOiJiZjIxODAxYy1iNGVlLTRkOTEtOTkyMC01Y2FlZGYyNmUxMjAifQ.rraJqI1kEaan97i5r9gEFl-EHqoSne5P2znlZkKqeL4

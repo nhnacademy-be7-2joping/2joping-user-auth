@@ -1,5 +1,6 @@
 package com.nhnacademy.twojoping.controller;
 
+import com.nhnacademy.twojoping.dto.response.MemberInfoResponseDto;
 import com.nhnacademy.twojoping.exception.InvalidRefreshToken;
 import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;
@@ -9,16 +10,31 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/auth")
 public class TokenController {
-
     private final JwtTokenProvider jwtTokenProvider;
 
-    @GetMapping("/auth/refreshToken")
+    /**
+     * @author Sauter001
+     * @param accessToken 사용자 정보를 가져올 JWT access token
+     * @return 사용자의 로그인 id와 role
+     */
+    @GetMapping("/user-info")
+    public ResponseEntity<MemberInfoResponseDto> getUserInfo(@CookieValue(name = "accessToken") String accessToken) {
+        String loginId = jwtTokenProvider.getUsername(accessToken);
+        String role = jwtTokenProvider.getRole(accessToken);
+        MemberInfoResponseDto memberInfoResponseDto = new MemberInfoResponseDto(loginId, role);
+        return ResponseEntity.ok(memberInfoResponseDto);
+    }
+
+    @GetMapping("/refreshToken")
     public ResponseEntity<?> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
 
         String newAccessToken;

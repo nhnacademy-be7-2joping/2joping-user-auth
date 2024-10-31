@@ -1,4 +1,4 @@
-package com.nhnacademy.twojoping.dto;
+package com.nhnacademy.twojoping.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 

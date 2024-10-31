@@ -1,6 +1,6 @@
 package com.nhnacademy.twojoping.controller;
 
-import com.nhnacademy.twojoping.dto.ErrorDto;
+import com.nhnacademy.twojoping.dto.response.ErrorDto;
 import com.nhnacademy.twojoping.exception.InvalidRefreshToken;
 import com.nhnacademy.twojoping.exception.MemberNotFoundException;
 import org.springframework.http.HttpStatus;
