@@ -1,4 +1,4 @@
-package com.nhnacademy.twojoping.dto;
+package com.nhnacademy.twojoping.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

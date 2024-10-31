@@ -34,7 +34,8 @@ public class Member extends Customer {
     private String password;
 
     @Column(name = "gender")
-    private Boolean gender;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @Column(name = "birthday")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -61,4 +62,8 @@ public class Member extends Customer {
     @JoinColumn(name = "customer_id")
     @JsonIgnore
     Customer customer;
+
+    public enum Gender {
+        M, F
+    }
 }
