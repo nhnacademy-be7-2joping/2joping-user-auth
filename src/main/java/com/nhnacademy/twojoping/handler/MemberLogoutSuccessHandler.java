@@ -26,7 +26,7 @@ public class MemberLogoutSuccessHandler implements LogoutSuccessHandler {
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
                                 Authentication authentication) throws IOException, ServletException {
 
-        //쿠키에서 토큰 추출
+        // 쿠키에서 토큰 추출
         List<String> tokens = jwtTokenProvider.resolveToken(request);
         for (String token : tokens) {
             if (token != null && jwtTokenProvider.validateToken(token)) {

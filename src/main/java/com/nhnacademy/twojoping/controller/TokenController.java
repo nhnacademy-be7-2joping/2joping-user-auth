@@ -58,6 +58,7 @@ public class TokenController {
             response.addCookie(cookie);
             return ResponseEntity.ok().build();
         }
+
         throw new InvalidRefreshToken();
     }
 }

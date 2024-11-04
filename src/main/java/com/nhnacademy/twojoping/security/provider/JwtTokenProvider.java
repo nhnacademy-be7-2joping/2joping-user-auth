@@ -54,8 +54,7 @@ public class JwtTokenProvider {
      */
     @PostConstruct
     private void setKey() {
-        byte[] decodedKey = Base64.getDecoder().decode(secretKey);
-        this.key = Keys.hmacShaKeyFor(decodedKey);
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     /**
@@ -72,7 +71,6 @@ public class JwtTokenProvider {
         Map<String, Object> header = new HashMap<>();
         header.put("typ", "JWT");
         header.put("alg", "HS256");
-
 
         return Jwts.builder()
                 .setHeader(header)
@@ -134,7 +132,6 @@ public class JwtTokenProvider {
         Map<String, Object> header = new HashMap<>();
         header.put("typ", "JWT");
         header.put("alg", "HS256");
-
 
         return Jwts.builder()
                 .setHeader(header)
