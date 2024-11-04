@@ -5,3 +5,5 @@ spring:
       port: 6379
       password: "*N2vya7H@muDTwdNMR!"
       database: 122
+  profiles:
+    active: dev-mysql

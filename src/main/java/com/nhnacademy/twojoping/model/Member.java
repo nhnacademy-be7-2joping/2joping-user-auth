@@ -62,7 +62,7 @@ public class Member extends Customer {
     @Column(name = "acc_purchase", nullable = false, columnDefinition = "INT DEFAULT 0")
     private int accPurchase;
 
-    enum Gender {
+    public enum Gender {
         M, F
     }
 }
