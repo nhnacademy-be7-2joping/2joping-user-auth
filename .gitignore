@@ -34,3 +34,4 @@ build/
 
 ### etc
 test-sql/
+/src/main/resources/application-dev-mysql.yml

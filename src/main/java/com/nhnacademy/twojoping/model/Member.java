@@ -9,13 +9,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends Customer {
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    @JsonIgnore
+    Customer customer;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_status_id", nullable = false)
     private MemberStatus memberStatus;
@@ -28,7 +32,7 @@ public class Member extends Customer {
     private String nickname;
 
     @Column(name = "login_id", length = 20, nullable = false, unique = true)
-    private String id;
+    private String loginId;
 
     @Column(name = "password", length = 255, nullable = false)
     private String password;
@@ -42,12 +46,12 @@ public class Member extends Customer {
     private LocalDate birthday;
 
     @Column(name = "join_date", nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime joinDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate joinDate;
 
     @Column(name = "recent_login_date", nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime recentLoginDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate recentLoginDate;
 
     @Column(name = "is_payco_login", nullable = false)
     private Boolean isPaycoLogin;
@@ -57,11 +61,6 @@ public class Member extends Customer {
 
     @Column(name = "acc_purchase", nullable = false, columnDefinition = "INT DEFAULT 0")
     private int accPurchase;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id")
-    @JsonIgnore
-    Customer customer;
 
     public enum Gender {
         M, F

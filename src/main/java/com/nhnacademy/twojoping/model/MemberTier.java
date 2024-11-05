@@ -14,7 +14,7 @@ public class MemberTier {
     @Size(max = 20)
     @NotNull
     @Column(unique = true)
-    String tierName;
+    String name;
 
     @NotNull
     Boolean status;
