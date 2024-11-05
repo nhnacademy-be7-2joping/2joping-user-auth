@@ -57,6 +57,5 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
         objectMapper.writeValue(response.getWriter(), resDto);
-        super.onAuthenticationSuccess(request, response, authentication);
     }
 }

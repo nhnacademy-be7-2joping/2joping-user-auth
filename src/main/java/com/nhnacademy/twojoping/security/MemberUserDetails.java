@@ -5,7 +5,6 @@ import com.nhnacademy.twojoping.model.Member;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +33,7 @@ public class MemberUserDetails implements UserDetailsWithId {
 
     @Override
     public String getUsername() {
-        return member.getId();
+        return member.getLoginId();
     }
 
     @Override

@@ -1,10 +1,7 @@
 spring:
-  datasource:
-    url: jdbc:mysql://133.186.241.167:3306/project_be7_2joping_dev
-    username: be7_2joping
-    password: WF.2!2CuQm_g7HB0
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
+  h2:
+    console:
+      enabled: false
   jpa:
     hibernate:
       ddl-auto: none
@@ -12,3 +9,14 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+
+mysql-info:
+  url: ba2840131e234a95a46d99ac7e17f43d
+  username: 8ae6c33e9b69482abecf5f40c276487f
+  password: af00bb3fd6ab4e2bb928546a31d43682
+
+keymanager:
+  appkey: 500rMJPT021TnyNl
+  url: https://api-keymanager.nhncloudservice.com/keymanager/v1.2
+  access-key-id: xbDehDmJgqDqjjLXa7Rl
+  secret-access-key: 1knhNA219Vu5ak8Y
