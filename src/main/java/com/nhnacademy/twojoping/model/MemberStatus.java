@@ -19,7 +19,7 @@ public class MemberStatus {
     private Long id;
 
     @NotNull
-    @Size(max = 20)
+    @Size(max = 10)
     @Column(unique = true)
     private String status;
 }
