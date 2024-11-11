@@ -1,9 +1,0 @@
-spring:
-  data:
-    redis: # session용 redis 설정
-      host: 133.186.241.167
-      port: 6379
-      password: "*N2vya7H@muDTwdNMR!"
-      database: 122
-  profiles:
-    active: dev-mysql
