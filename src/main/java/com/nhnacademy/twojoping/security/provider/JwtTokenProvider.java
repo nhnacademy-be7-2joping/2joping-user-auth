@@ -1,5 +1,6 @@
 package com.nhnacademy.twojoping.security.provider;
 
+import com.nhnacademy.twojoping.service.MemberService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -7,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,7 +17,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,11 @@ import java.util.stream.Collectors;
  * <p>김연우: 전체 메소드 작성</p>
  */
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
+
+    private final MemberService memberService;
+
     @Value("${jwt.secret-key}")
     private String secretKey;
 
@@ -41,10 +46,6 @@ public class JwtTokenProvider {
     @Value("${jwt.refreshToken-validity-in-milliseconds}")
     private long refreshTokenValidity;
 
-
-    public JwtTokenProvider() throws NoSuchAlgorithmException {
-
-    }
 
     /**
      * secretKey를 기반으로 HMAC 키를 초기화한다.
@@ -66,6 +67,7 @@ public class JwtTokenProvider {
      */
     public String generateAccessToken(Authentication authentication) {
         String username = authentication.getName();
+        long customerId = memberService.getCustomerId(authentication.getName());
         Date now = new Date();
         Date validity = new Date(now.getTime() + accessTokenValidity);
 
@@ -77,6 +79,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setHeader(header)
                 .setSubject(username)
+                .claim("customerId", String.valueOf(customerId))
                 .claim("role", authentication
                         .getAuthorities()
                         .stream()
@@ -128,6 +131,7 @@ public class JwtTokenProvider {
      */
     public String generateRefreshToken(Authentication authentication) {
         String username = authentication.getName();
+        long customerId = memberService.getCustomerId(authentication.getName());
         Date now = new Date();
         Date validity = new Date(now.getTime() + refreshTokenValidity);
 
@@ -139,6 +143,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setHeader(header)
                 .setSubject(username)
+                .claim("customerId", String.valueOf(customerId))
                 .claim("role", authentication
                         .getAuthorities()
                         .stream()
