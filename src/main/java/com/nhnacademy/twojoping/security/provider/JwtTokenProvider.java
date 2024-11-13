@@ -62,10 +62,9 @@ public class JwtTokenProvider {
     /**
      * 사용자 이름과 권한 정보 든 JWT 액세스 토큰 발급
      *
-     * @param authentication 사용자 인증 정보
      * @return 생성된 JWT 토큰 문자열
      */
-    public String generateAccessToken(Authentication authentication) {
+    public String generateAccessToken() {
         Date now = new Date();
         Date validity = new Date(now.getTime() + accessTokenValidity);
 
@@ -84,46 +83,48 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 주어진 refresh token에서 새 access token 재발급
+     * 인증 정보 기반으로 JWT 리프레시 토큰 발급
      *
-     * @param refreshToken refresh token 값
-     * @return 재발급된 access token
+     * @param jti access token 의 jti
+     * @return 생성된 refresh token
      */
-    public String regenerateAccessToken(String refreshToken) {
+    public String generateRefreshToken(String jti) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + refreshTokenValidity);
+
         Map<String, Object> header = new HashMap<>();
         header.put("typ", "JWT");
         header.put("alg", "HS256");
+
 
         return Jwts.builder()
                 .setHeader(header)
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .setId(UUID.randomUUID().toString())
+                .setId(jti)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     /**
-     * 인증 정보 기반으로 JWT 리프레시 토큰 발급
+     * 재발급한 access token 의 jti 를 일치시키기 위해 JWT 리프레시 토큰 재발급
      *
-     * @return 생성된 refresh token
+     * @param jti access token 의 jti
+     * @param remainingExpirationTime refresh token 의 남은만료 시간
+     * @return 재발급된 refresh token
      */
-    public String generateRefreshToken(Authentication authentication) {
+    public String reGenerateRefreshToken(String jti, long remainingExpirationTime) {
         Date now = new Date();
-        Date validity = new Date(now.getTime() + refreshTokenValidity);
-
+        Date validity = new Date(now.getTime() + remainingExpirationTime);
         Map<String, Object> header = new HashMap<>();
         header.put("typ", "JWT");
         header.put("alg", "HS256");
-
 
         return Jwts.builder()
                 .setHeader(header)
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .setId(UUID.randomUUID().toString())
+                .setId(jti)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }

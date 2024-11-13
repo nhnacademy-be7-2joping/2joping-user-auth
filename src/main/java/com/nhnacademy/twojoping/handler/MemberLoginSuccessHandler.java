@@ -50,15 +50,18 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         // JWT 토큰 발급후 쿠키에 추가
         // 액세스 토큰
-        String accessToken = jwtTokenProvider.generateAccessToken(authentication);
+        String accessToken = jwtTokenProvider.generateAccessToken();
         Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
         accessTokenCookie.setHttpOnly(true);
         accessTokenCookie.setSecure(false);
         accessTokenCookie.setPath("/");
         response.addCookie(accessTokenCookie);
 
+        // JTI 추출
+        String jti = jwtTokenProvider.getJti(accessToken);
+
         // 리프레시 토큰
-        String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(jti);
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);
         refreshCookie.setSecure(false);
@@ -66,7 +69,6 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.addCookie(refreshCookie);
 
         //redis 매칭저장
-        String jti = jwtTokenProvider.getJti(accessToken);
         keyMap.put(String.valueOf(id), role);
         redisTemplate.opsForHash().putAll(jti, keyMap);
         redisTemplate.expire(jti, Duration.ofMillis(accessTokenValidityInMilliseconds));

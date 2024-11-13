@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.twojoping.dto.response.MemberInfoResponseDto;
 import com.nhnacademy.twojoping.exception.InvalidRefreshToken;
 import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,33 +36,43 @@ public class TokenController {
      */
     @GetMapping("/user-info")
     public ResponseEntity<MemberInfoResponseDto> getUserInfo(@CookieValue(name = "accessToken") String accessToken) {
-        try {
-            String jti = jwtTokenProvider.getJti(accessToken);
-            Map<Object, Object> map = redisTemplate.opsForHash().entries(jti);
+        // jti 값을 이용해서 redis 에서 정보를 조회함
+        String jti = jwtTokenProvider.getJti(accessToken);
+        Map<Object, Object> map = redisTemplate.opsForHash().entries(jti);
 
-            long key = 0;
-            String value = null;
-            for (Map.Entry<Object, Object> entry : map.entrySet()) {
-                key = Long.parseLong(entry.getKey().toString());
-                value = entry.getValue().toString();
-            }
-            MemberInfoResponseDto memberInfoResponseDto = new MemberInfoResponseDto(key, value);
-            return ResponseEntity.ok(memberInfoResponseDto);
-        } catch (Exception e) {
-            throw new InvalidRefreshToken();
+        // response
+        long key = 0;
+        String value = null;
+        for (Map.Entry<Object, Object> entry : map.entrySet()) {
+            key = Long.parseLong(entry.getKey().toString());
+            value = entry.getValue().toString();
         }
+        MemberInfoResponseDto memberInfoResponseDto = new MemberInfoResponseDto(key, value);
+        return ResponseEntity.ok(memberInfoResponseDto);
     }
 
     @GetMapping("/refreshToken")
     public ResponseEntity<?> refreshAccessToken(@CookieValue(name = "refreshToken") String refreshToken, HttpServletResponse response) {
         // refreshToken 쿠키 검증후 accessToken 쿠키 재발급, invalid token 이면 예외처리
         if (jwtTokenProvider.validateToken(refreshToken) && refreshToken != null) {
-            String newAccessToken = jwtTokenProvider.regenerateAccessToken(refreshToken);
-            Cookie cookie = new Cookie("accessToken", newAccessToken);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(false);
-            cookie.setPath("/");
-            response.addCookie(cookie);
+            String newAccessToken = jwtTokenProvider.generateAccessToken();
+            String newRefreshToken = jwtTokenProvider.reGenerateRefreshToken(
+                    jwtTokenProvider.getJti(newAccessToken),
+                    jwtTokenProvider.getRemainingExpirationTime(refreshToken));
+
+            // accessToken 재발급
+            Cookie accessCookie = new Cookie("accessToken", newAccessToken);
+            accessCookie.setHttpOnly(true);
+            accessCookie.setSecure(false);
+            accessCookie.setPath("/");
+            response.addCookie(accessCookie);
+
+            // refreshToken 재발급
+            Cookie refreshCookie = new Cookie("refreshToken", newRefreshToken);
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setSecure(false);
+            refreshCookie.setPath("/");
+            response.addCookie(refreshCookie);
             return ResponseEntity.ok().build();
         }
         throw new InvalidRefreshToken();
