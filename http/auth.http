@@ -35,4 +35,3 @@ GET localhost:8083/auth/refreshToken
 
 ### 토큰에서 정보 가져오기
 GET localhost:8083/auth/user-info
-Cookie: accessToken=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMSIsInJvbGUiOiJST0xFX01FTUJFUiIsImlhdCI6MTczMDY5NDU3NCwiZXhwIjoxNzMwNjk1NDc0LCJqdGkiOiIzOGQwNzJkMy1iZDU0LTRlODQtYjljMi01YWU3ZDY2ZjVmMzkifQ.rMvbriBtaXSshIZ2gZ37BDhscWmEKTS3pRHfq5adAzU

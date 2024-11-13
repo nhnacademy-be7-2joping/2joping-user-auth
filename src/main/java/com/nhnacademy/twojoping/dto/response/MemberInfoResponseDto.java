@@ -1,7 +1,7 @@
 package com.nhnacademy.twojoping.dto.response;
 
 public record MemberInfoResponseDto(
-        String loginId,
+        long id,
         String role
 ) {
 }
