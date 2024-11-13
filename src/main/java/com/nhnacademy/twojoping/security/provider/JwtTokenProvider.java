@@ -66,8 +66,6 @@ public class JwtTokenProvider {
      * @return 생성된 JWT 토큰 문자열
      */
     public String generateAccessToken(Authentication authentication) {
-        String username = authentication.getName();
-        long customerId = memberService.getCustomerId(authentication.getName());
         Date now = new Date();
         Date validity = new Date(now.getTime() + accessTokenValidity);
 
@@ -78,13 +76,6 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setHeader(header)
-                .setSubject(username)
-                .claim("customerId", String.valueOf(customerId))
-                .claim("role", authentication
-                        .getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.joining(",")))
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .setId(UUID.randomUUID().toString())
@@ -99,9 +90,6 @@ public class JwtTokenProvider {
      * @return 재발급된 access token
      */
     public String regenerateAccessToken(String refreshToken) {
-        Authentication authentication = getAuthentication(refreshToken);
-        String username = authentication.getName();
-
         Date now = new Date();
         Date validity = new Date(now.getTime() + refreshTokenValidity);
         Map<String, Object> header = new HashMap<>();
@@ -110,12 +98,6 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setHeader(header)
-                .setSubject(username)
-                .claim("role", authentication
-                        .getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.joining(",")))
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .setId(UUID.randomUUID().toString())
@@ -126,12 +108,9 @@ public class JwtTokenProvider {
     /**
      * 인증 정보 기반으로 JWT 리프레시 토큰 발급
      *
-     * @param authentication 사용자 인증 정보
      * @return 생성된 refresh token
      */
     public String generateRefreshToken(Authentication authentication) {
-        String username = authentication.getName();
-        long customerId = memberService.getCustomerId(authentication.getName());
         Date now = new Date();
         Date validity = new Date(now.getTime() + refreshTokenValidity);
 
@@ -142,13 +121,6 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setHeader(header)
-                .setSubject(username)
-                .claim("customerId", String.valueOf(customerId))
-                .claim("role", authentication
-                        .getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.joining(",")))
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .setId(UUID.randomUUID().toString())
@@ -210,48 +182,6 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody()
                 .getId();
-    }
-
-    /**
-     * 주어진 토큰에서 사용자 이름을 추출
-     *
-     * @param token 사용자 이름을 추출할 JWT 토큰
-     * @return 사용자 이름
-     */
-    public String getUsername(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
-    }
-
-    /**
-     * 주어진 토큰에서 사용자 역할을 추출
-     *
-     * @param token 사용자 역할을 추출할 JWT 토큰
-     * @return 사용자 역할
-     */
-    public String getRole(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().get(
-                "role",
-                String.class
-        );
-    }
-
-    /**
-     * 토큰에서 사용자 인증 정보 생성하여 반환
-     * @param token 인증 정보를 추출할 JWT 토큰
-     * @return 생성된 인증 객체
-     */
-    public Authentication getAuthentication(String token) {
-        // 토큰에서 사용자 이름을 추출
-        String username = getUsername(token);
-
-        // 사용자 권한(roles) 추출
-        List<GrantedAuthority> authorities = Arrays.stream(getRole(token)
-                                                                   .split(","))
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-
-        // 사용자 인증 정보를 바탕으로 UsernamePasswordAuthenticationToken 생성
-        return new UsernamePasswordAuthenticationToken(username, null, authorities);
     }
 
     /**

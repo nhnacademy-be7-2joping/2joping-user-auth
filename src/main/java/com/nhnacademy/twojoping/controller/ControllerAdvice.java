@@ -3,6 +3,7 @@ package com.nhnacademy.twojoping.controller;
 import com.nhnacademy.twojoping.dto.response.ErrorDto;
 import com.nhnacademy.twojoping.exception.InvalidRefreshToken;
 import com.nhnacademy.twojoping.exception.MemberNotFoundException;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -25,7 +26,14 @@ public class ControllerAdvice {
 
     @ExceptionHandler({InvalidRefreshToken.class})
     public ResponseEntity<ErrorDto> invalidRefreshToken(InvalidRefreshToken e) {
-        ErrorDto errorDto = new ErrorDto(403, "Invalid Refresh Token", e.getMessage());
+        ErrorDto errorDto = new ErrorDto(403, "Invalid access Token", e.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorDto);
     }
+
+    @ExceptionHandler({ExpiredJwtException.class})
+    public ResponseEntity<ErrorDto> expiredJwtException(io.jsonwebtoken.ExpiredJwtException e) {
+        ErrorDto errorDto = new ErrorDto(401, "Expired JWT Token", e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDto);
+    }
+
 }

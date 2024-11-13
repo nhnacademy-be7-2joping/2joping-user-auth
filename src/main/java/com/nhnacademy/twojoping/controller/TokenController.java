@@ -28,29 +28,18 @@ public class TokenController {
      */
     @GetMapping("/user-info")
     public ResponseEntity<MemberInfoResponseDto> getUserInfo(@CookieValue(name = "accessToken") String accessToken) {
-        String loginId = jwtTokenProvider.getUsername(accessToken);
-        String role = jwtTokenProvider.getRole(accessToken);
-        MemberInfoResponseDto memberInfoResponseDto = new MemberInfoResponseDto(loginId, role);
-        return ResponseEntity.ok(memberInfoResponseDto);
+//        String loginId = jwtTokenProvider.getUsername(accessToken);// redis 조회
+//        String role = jwtTokenProvider.getRole(accessToken);// redis 조회
+//        MemberInfoResponseDto memberInfoResponseDto = new MemberInfoResponseDto(loginId, role);
+//        return ResponseEntity.ok(memberInfoResponseDto);
+        return null;
     }
 
     @GetMapping("/refreshToken")
-    public ResponseEntity<?> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
-
-        String newAccessToken;
-        String refreshToken = null;
-
-        // request 에서 refreshToken 추출
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("refreshToken")) {
-                refreshToken = cookie.getValue();
-            }
-        }
-
+    public ResponseEntity<?> refreshAccessToken(@CookieValue(name = "refreshToken") String refreshToken, HttpServletResponse response) {
         // refreshToken 쿠키 검증후 accessToken 쿠키 재발급, invalid token 이면 예외처리
         if (jwtTokenProvider.validateToken(refreshToken) && refreshToken != null) {
-            newAccessToken = jwtTokenProvider.regenerateAccessToken(refreshToken);
+            String newAccessToken = jwtTokenProvider.regenerateAccessToken(refreshToken);
             Cookie cookie = new Cookie("accessToken", newAccessToken);
             cookie.setHttpOnly(true);
             cookie.setSecure(false);
@@ -60,4 +49,5 @@ public class TokenController {
         }
         throw new InvalidRefreshToken();
     }
+
 }

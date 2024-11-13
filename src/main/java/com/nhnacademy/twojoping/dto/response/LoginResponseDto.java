@@ -6,7 +6,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class LoginResponseDto {
-    private Long customerId; // 고객 ID
-    private String id; // 사용자 정보
+    private long id; // 사용자 정보 customerId
+    private String role; // 권한
 }
-
