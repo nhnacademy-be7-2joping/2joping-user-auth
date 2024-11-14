@@ -26,12 +26,12 @@ public class ControllerAdvice {
 
     @ExceptionHandler({InvalidRefreshToken.class})
     public ResponseEntity<ErrorDto> invalidRefreshToken(InvalidRefreshToken e) {
-        ErrorDto errorDto = new ErrorDto(403, "Invalid access Token", e.getMessage());
+        ErrorDto errorDto = new ErrorDto(403, "Invalid refresh Token", e.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorDto);
     }
 
     @ExceptionHandler({ExpiredJwtException.class})
-    public ResponseEntity<ErrorDto> expiredJwtException(io.jsonwebtoken.ExpiredJwtException e) {
+    public ResponseEntity<ErrorDto> expiredJwtException(ExpiredJwtException e) {
         ErrorDto errorDto = new ErrorDto(401, "Expired JWT Token", e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDto);
     }

@@ -1,12 +1,10 @@
 package com.nhnacademy.twojoping.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.twojoping.dto.response.MemberInfoResponseDto;
 import com.nhnacademy.twojoping.exception.InvalidRefreshToken;
 import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -53,11 +51,21 @@ public class TokenController {
 
     @GetMapping("/refreshToken")
     public ResponseEntity<?> refreshAccessToken(@CookieValue(name = "refreshToken") String refreshToken, HttpServletResponse response) {
+        // 이전 토큰 삭제
+        // jti 값을 이용해서 redis 에서 정보를 조회함
+        String previousjti = jwtTokenProvider.getJti(refreshToken);
+        Map<Object, Object> map = redisTemplate.opsForHash().entries(previousjti);
+        redisTemplate.delete(previousjti);
+
+        // 새로운 Jti
+        String newJti = "";
+
         // refreshToken 쿠키 검증후 accessToken 쿠키 재발급, invalid token 이면 예외처리
         if (jwtTokenProvider.validateToken(refreshToken) && refreshToken != null) {
             String newAccessToken = jwtTokenProvider.generateAccessToken();
+            newJti = jwtTokenProvider.getJti(newAccessToken);
             String newRefreshToken = jwtTokenProvider.reGenerateRefreshToken(
-                    jwtTokenProvider.getJti(newAccessToken),
+                    newJti,
                     jwtTokenProvider.getRemainingExpirationTime(refreshToken));
 
             // accessToken 재발급
@@ -73,6 +81,9 @@ public class TokenController {
             refreshCookie.setSecure(false);
             refreshCookie.setPath("/");
             response.addCookie(refreshCookie);
+
+            redisTemplate.opsForHash().putAll(newJti, map);
+
             return ResponseEntity.ok().build();
         }
         throw new InvalidRefreshToken();

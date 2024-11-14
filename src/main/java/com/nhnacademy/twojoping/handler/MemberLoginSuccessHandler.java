@@ -28,8 +28,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    @Value("${jwt.accessToken-validity-in-milliseconds}")
-    private long accessTokenValidityInMilliseconds;
+    @Value("${jwt.refreshToken-validity-in-milliseconds}")
+    private long refreshTokenValidityInMilliseconds;
 
     private final ObjectMapper objectMapper;
 
@@ -71,7 +71,7 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         //redis 매칭저장
         keyMap.put(String.valueOf(id), role);
         redisTemplate.opsForHash().putAll(jti, keyMap);
-        redisTemplate.expire(jti, Duration.ofMillis(accessTokenValidityInMilliseconds));
+        redisTemplate.expire(jti, Duration.ofMillis(refreshTokenValidityInMilliseconds));
 
         // response
         response.setContentType("application/json");

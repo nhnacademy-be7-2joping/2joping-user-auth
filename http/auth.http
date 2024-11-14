@@ -1,5 +1,5 @@
 ### 일반 로그인
-POST localhost:8083/login
+POST localhost:8082/login
 Content-Type: application/json
 
 {
@@ -29,9 +29,9 @@ Content-Type: application/json
 GET localhost:8083/logout
 
 ### 토큰 재발급 요청
-GET localhost:8083/auth/refreshToken
+GET localhost:8082/auth/refreshToken
 
 ### 프론트에서 로그인 완료시 다시 로그아웃후 로그인이 가능하도록 처리 해야함.
 
 ### 토큰에서 정보 가져오기
-GET localhost:8083/auth/user-info
+GET localhost:8082/auth/user-info
