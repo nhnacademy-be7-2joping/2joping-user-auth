@@ -16,4 +16,8 @@ public class MemberService {
                 () -> new MemberNotFoundException(username)
         );
     }
+
+    public long getCustomerId(String username) {
+        return memberRepository.findCustomerIdByLoginId(username);
+    }
 }
