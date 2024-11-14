@@ -32,7 +32,7 @@ public class ControllerAdvice {
 
     @ExceptionHandler({ExpiredJwtException.class})
     public ResponseEntity<ErrorDto> expiredJwtException(ExpiredJwtException e) {
-        ErrorDto errorDto = new ErrorDto(HttpStatus.UNAUTHORIZED, "Expired JWT Token", e.getMessage());
+        ErrorDto errorDto = new ErrorDto(HttpStatus.UNAUTHORIZED, "TOKEN_EXPIRED", e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDto);
     }
 

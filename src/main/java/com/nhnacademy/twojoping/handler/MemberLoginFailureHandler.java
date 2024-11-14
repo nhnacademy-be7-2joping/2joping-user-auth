@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
@@ -28,7 +29,7 @@ public class MemberLoginFailureHandler extends SimpleUrlAuthenticationFailureHan
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
 
         // ErrorDto 생성 (예시: BadCredentialsException의 경우)
-        ErrorDto errorDto = new ErrorDto(401, "Unauthorized", exception.getMessage());
+        ErrorDto errorDto = new ErrorDto(HttpStatus.UNAUTHORIZED, "Unauthorized", exception.getMessage());
 
         // ErrorDto를 JSON으로 응답
         objectMapper.writeValue(response.getWriter(), errorDto);
