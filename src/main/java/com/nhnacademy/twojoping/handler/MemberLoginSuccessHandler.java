@@ -71,7 +71,7 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         //redis 매칭저장
         keyMap.put(String.valueOf(id), role);
         redisTemplate.opsForHash().putAll(jti, keyMap);
-        redisTemplate.expire(jti, Duration.ofMillis(accessTokenValidityInMilliseconds));
+//        redisTemplate.expire(jti, Duration.ofMillis(accessTokenValidityInMilliseconds));
 
         // response
         response.setContentType("application/json");

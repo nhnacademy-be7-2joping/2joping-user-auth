@@ -1,4 +1,6 @@
 package com.nhnacademy.twojoping.dto.response;
 
-public record ErrorDto(int status, String errorCode, String message) {
+import org.springframework.http.HttpStatus;
+
+public record ErrorDto(HttpStatus status, String errorCode, String errorMessage) {
 }

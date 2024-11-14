@@ -14,25 +14,25 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ControllerAdvice {
     @ExceptionHandler({MemberNotFoundException.class})
     public ResponseEntity<ErrorDto> notFound(MemberNotFoundException e) {
-        ErrorDto errorDto = new ErrorDto(404, "Not Found", e.getMessage());
+        ErrorDto errorDto = new ErrorDto(HttpStatus.NOT_FOUND, "Not Found", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDto);
     }
 
     @ExceptionHandler({BadCredentialsException.class})
     public ResponseEntity<ErrorDto> badCredentials(BadCredentialsException e) {
-        ErrorDto errorDto = new ErrorDto(401, "Unauthorized", e.getMessage());
+        ErrorDto errorDto = new ErrorDto(HttpStatus.UNAUTHORIZED, "Unauthorized", e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDto);
     }
 
     @ExceptionHandler({InvalidRefreshToken.class})
     public ResponseEntity<ErrorDto> invalidRefreshToken(InvalidRefreshToken e) {
-        ErrorDto errorDto = new ErrorDto(403, "Invalid access Token", e.getMessage());
+        ErrorDto errorDto = new ErrorDto(HttpStatus.FORBIDDEN, "INVALID_TOKEN: Invalid access Token", e.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorDto);
     }
 
     @ExceptionHandler({ExpiredJwtException.class})
     public ResponseEntity<ErrorDto> expiredJwtException(io.jsonwebtoken.ExpiredJwtException e) {
-        ErrorDto errorDto = new ErrorDto(401, "Expired JWT Token", e.getMessage());
+        ErrorDto errorDto = new ErrorDto(HttpStatus.UNAUTHORIZED, "TOKEN_EXPIRED: Expired JWT Token", e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDto);
     }
 
