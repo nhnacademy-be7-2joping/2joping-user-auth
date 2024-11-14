@@ -1,5 +1,6 @@
 package com.nhnacademy.twojoping.security.provider;
 
+import com.nhnacademy.twojoping.service.MemberService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -7,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,7 +17,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,11 @@ import java.util.stream.Collectors;
  * <p>김연우: 전체 메소드 작성</p>
  */
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
+
+    private final MemberService memberService;
+
     @Value("${jwt.secret-key}")
     private String secretKey;
 
@@ -41,10 +46,6 @@ public class JwtTokenProvider {
     @Value("${jwt.refreshToken-validity-in-milliseconds}")
     private long refreshTokenValidity;
 
-
-    public JwtTokenProvider() throws NoSuchAlgorithmException {
-
-    }
 
     /**
      * secretKey를 기반으로 HMAC 키를 초기화한다.
@@ -61,11 +62,9 @@ public class JwtTokenProvider {
     /**
      * 사용자 이름과 권한 정보 든 JWT 액세스 토큰 발급
      *
-     * @param authentication 사용자 인증 정보
      * @return 생성된 JWT 토큰 문자열
      */
-    public String generateAccessToken(Authentication authentication) {
-        String username = authentication.getName();
+    public String generateAccessToken() {
         Date now = new Date();
         Date validity = new Date(now.getTime() + accessTokenValidity);
 
@@ -76,43 +75,6 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setHeader(header)
-                .setSubject(username)
-                .claim("role", authentication
-                        .getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.joining(",")))
-                .setIssuedAt(now)
-                .setExpiration(validity)
-                .setId(UUID.randomUUID().toString())
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    /**
-     * 주어진 refresh token에서 새 access token 재발급
-     *
-     * @param refreshToken refresh token 값
-     * @return 재발급된 access token
-     */
-    public String regenerateAccessToken(String refreshToken) {
-        Authentication authentication = getAuthentication(refreshToken);
-        String username = authentication.getName();
-
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + refreshTokenValidity);
-        Map<String, Object> header = new HashMap<>();
-        header.put("typ", "JWT");
-        header.put("alg", "HS256");
-
-        return Jwts.builder()
-                .setHeader(header)
-                .setSubject(username)
-                .claim("role", authentication
-                        .getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.joining(",")))
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .setId(UUID.randomUUID().toString())
@@ -123,11 +85,10 @@ public class JwtTokenProvider {
     /**
      * 인증 정보 기반으로 JWT 리프레시 토큰 발급
      *
-     * @param authentication 사용자 인증 정보
+     * @param jti access token 의 jti
      * @return 생성된 refresh token
      */
-    public String generateRefreshToken(Authentication authentication) {
-        String username = authentication.getName();
+    public String generateRefreshToken(String jti) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + refreshTokenValidity);
 
@@ -138,15 +99,32 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setHeader(header)
-                .setSubject(username)
-                .claim("role", authentication
-                        .getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.joining(",")))
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .setId(UUID.randomUUID().toString())
+                .setId(jti)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /**
+     * 재발급한 access token 의 jti 를 일치시키기 위해 JWT 리프레시 토큰 재발급
+     *
+     * @param jti access token 의 jti
+     * @param remainingExpirationTime refresh token 의 남은만료 시간
+     * @return 재발급된 refresh token
+     */
+    public String reGenerateRefreshToken(String jti, long remainingExpirationTime) {
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + remainingExpirationTime);
+        Map<String, Object> header = new HashMap<>();
+        header.put("typ", "JWT");
+        header.put("alg", "HS256");
+
+        return Jwts.builder()
+                .setHeader(header)
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .setId(jti)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -205,48 +183,6 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody()
                 .getId();
-    }
-
-    /**
-     * 주어진 토큰에서 사용자 이름을 추출
-     *
-     * @param token 사용자 이름을 추출할 JWT 토큰
-     * @return 사용자 이름
-     */
-    public String getUsername(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
-    }
-
-    /**
-     * 주어진 토큰에서 사용자 역할을 추출
-     *
-     * @param token 사용자 역할을 추출할 JWT 토큰
-     * @return 사용자 역할
-     */
-    public String getRole(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().get(
-                "role",
-                String.class
-        );
-    }
-
-    /**
-     * 토큰에서 사용자 인증 정보 생성하여 반환
-     * @param token 인증 정보를 추출할 JWT 토큰
-     * @return 생성된 인증 객체
-     */
-    public Authentication getAuthentication(String token) {
-        // 토큰에서 사용자 이름을 추출
-        String username = getUsername(token);
-
-        // 사용자 권한(roles) 추출
-        List<GrantedAuthority> authorities = Arrays.stream(getRole(token)
-                                                                   .split(","))
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-
-        // 사용자 인증 정보를 바탕으로 UsernamePasswordAuthenticationToken 생성
-        return new UsernamePasswordAuthenticationToken(username, null, authorities);
     }
 
     /**

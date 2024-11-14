@@ -26,18 +26,12 @@ public class MemberLogoutSuccessHandler implements LogoutSuccessHandler {
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
                                 Authentication authentication) throws IOException, ServletException {
 
-        //쿠키에서 토큰 추출
+        // 쿠키에서 토큰 추출
         List<String> tokens = jwtTokenProvider.resolveToken(request);
-        for (String token : tokens) {
-            if (token != null && jwtTokenProvider.validateToken(token)) {
-                // 토큰의 남은 유효 시간 계산
-                long expiration = jwtTokenProvider.getRemainingExpirationTime(token);
-                String jti = jwtTokenProvider.getJti(token);
+        String accessToken = tokens.get(0);
 
-                // Redis에 블랙리스트로 추가하고, 남은 시간 동안 저장
-                redisTemplate.opsForValue().set(jti, token, expiration, TimeUnit.MILLISECONDS);
-            }
-        }
+        // redis  정보삭제
+        redisTemplate.delete(jwtTokenProvider.getJti(accessToken));
 
         // 쿠키 삭제
         Cookie cookie = new Cookie("accessToken", null);

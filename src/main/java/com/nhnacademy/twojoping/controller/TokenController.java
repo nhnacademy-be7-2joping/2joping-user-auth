@@ -3,22 +3,28 @@ package com.nhnacademy.twojoping.controller;
 import com.nhnacademy.twojoping.dto.response.MemberInfoResponseDto;
 import com.nhnacademy.twojoping.exception.InvalidRefreshToken;
 import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
 public class TokenController {
+
+    private final RedisTemplate<String, Object> redisTemplate;
+
     private final JwtTokenProvider jwtTokenProvider;
 
     /**
@@ -28,36 +34,59 @@ public class TokenController {
      */
     @GetMapping("/user-info")
     public ResponseEntity<MemberInfoResponseDto> getUserInfo(@CookieValue(name = "accessToken") String accessToken) {
-        String loginId = jwtTokenProvider.getUsername(accessToken);
-        String role = jwtTokenProvider.getRole(accessToken);
-        MemberInfoResponseDto memberInfoResponseDto = new MemberInfoResponseDto(loginId, role);
+        // jti 값을 이용해서 redis 에서 정보를 조회함
+        String jti = jwtTokenProvider.getJti(accessToken);
+        Map<Object, Object> map = redisTemplate.opsForHash().entries(jti);
+
+        // response
+        long key = 0;
+        String value = null;
+        for (Map.Entry<Object, Object> entry : map.entrySet()) {
+            key = Long.parseLong(entry.getKey().toString());
+            value = entry.getValue().toString();
+        }
+        MemberInfoResponseDto memberInfoResponseDto = new MemberInfoResponseDto(key, value);
         return ResponseEntity.ok(memberInfoResponseDto);
     }
 
     @GetMapping("/refreshToken")
-    public ResponseEntity<?> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> refreshAccessToken(@CookieValue(name = "refreshToken") String refreshToken, HttpServletResponse response) {
+        // 이전 토큰 삭제
+        // jti 값을 이용해서 redis 에서 정보를 조회함
+        String previousjti = jwtTokenProvider.getJti(refreshToken);
+        Map<Object, Object> map = redisTemplate.opsForHash().entries(previousjti);
+        redisTemplate.delete(previousjti);
 
-        String newAccessToken;
-        String refreshToken = null;
-
-        // request 에서 refreshToken 추출
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("refreshToken")) {
-                refreshToken = cookie.getValue();
-            }
-        }
+        // 새로운 Jti
+        String newJti = "";
 
         // refreshToken 쿠키 검증후 accessToken 쿠키 재발급, invalid token 이면 예외처리
         if (jwtTokenProvider.validateToken(refreshToken) && refreshToken != null) {
-            newAccessToken = jwtTokenProvider.regenerateAccessToken(refreshToken);
-            Cookie cookie = new Cookie("accessToken", newAccessToken);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(false);
-            cookie.setPath("/");
-            response.addCookie(cookie);
+            String newAccessToken = jwtTokenProvider.generateAccessToken();
+            newJti = jwtTokenProvider.getJti(newAccessToken);
+            String newRefreshToken = jwtTokenProvider.reGenerateRefreshToken(
+                    newJti,
+                    jwtTokenProvider.getRemainingExpirationTime(refreshToken));
+
+            // accessToken 재발급
+            Cookie accessCookie = new Cookie("accessToken", newAccessToken);
+            accessCookie.setHttpOnly(true);
+            accessCookie.setSecure(false);
+            accessCookie.setPath("/");
+            response.addCookie(accessCookie);
+
+            // refreshToken 재발급
+            Cookie refreshCookie = new Cookie("refreshToken", newRefreshToken);
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setSecure(false);
+            refreshCookie.setPath("/");
+            response.addCookie(refreshCookie);
+
+            redisTemplate.opsForHash().putAll(newJti, map);
+
             return ResponseEntity.ok().build();
         }
         throw new InvalidRefreshToken();
     }
+
 }
