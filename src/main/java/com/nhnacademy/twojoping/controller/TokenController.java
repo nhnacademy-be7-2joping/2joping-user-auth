@@ -3,7 +3,6 @@ package com.nhnacademy.twojoping.controller;
 import com.nhnacademy.twojoping.dto.response.MemberInfoResponseDto;
 import com.nhnacademy.twojoping.exception.InvalidRefreshToken;
 import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -53,9 +52,9 @@ public class TokenController {
     public ResponseEntity<?> refreshAccessToken(@CookieValue(name = "refreshToken") String refreshToken, HttpServletResponse response) {
         // 이전 토큰 삭제
         // jti 값을 이용해서 redis 에서 정보를 조회함
-        String previousjti = jwtTokenProvider.getJti(refreshToken);
-        Map<Object, Object> map = redisTemplate.opsForHash().entries(previousjti);
-        redisTemplate.delete(previousjti);
+        String previousJti = jwtTokenProvider.getJti(refreshToken);
+        Map<Object, Object> map = redisTemplate.opsForHash().entries(previousJti);
+        redisTemplate.delete(previousJti);
 
         // 새로운 Jti
         String newJti = "";
