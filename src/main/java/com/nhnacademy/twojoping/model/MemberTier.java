@@ -23,7 +23,10 @@ public class MemberTier {
     Byte accRate;
 
     @NotNull
-    int promotion;
+    int minPromotion;
+
+    @NotNull
+    int maxPromotion;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
