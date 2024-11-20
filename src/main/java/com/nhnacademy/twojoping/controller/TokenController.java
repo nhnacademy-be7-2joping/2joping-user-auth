@@ -52,8 +52,8 @@ public class TokenController {
 
     @GetMapping("/refreshToken")
     public ResponseEntity<?> refreshAccessToken(@CookieValue(name = "refreshToken") String refreshToken,
-                                                @RequestHeader("X-Customer-Id") String customerId,
-                                                @RequestHeader("X-Customer-Role") String customerRole,
+//                                                @RequestHeader("X-Customer-Id") String customerId,
+//                                                @RequestHeader("X-Customer-Role") String customerRole,
                                                 HttpServletResponse response) {
         // 이전 토큰 삭제
         // jti 값을 이용해서 redis 에서 정보를 조회함
