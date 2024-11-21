@@ -40,4 +40,7 @@ public class MemberUserDetails implements UserDetailsWithId {
     public Long getId() {
         return member.getCustomerId();
     }
+
+    @Override
+    public String getNickName() { return member.getNickname(); }
 }

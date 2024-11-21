@@ -4,16 +4,14 @@ import com.nhnacademy.twojoping.dto.response.MemberInfoResponseDto;
 import com.nhnacademy.twojoping.exception.InvalidRefreshToken;
 import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -38,18 +36,25 @@ public class TokenController {
         Map<Object, Object> map = redisTemplate.opsForHash().entries(jti);
 
         // response
+        String nickName = null;
         long key = 0;
-        String value = null;
+        String role = null;
         for (Map.Entry<Object, Object> entry : map.entrySet()) {
+            if (entry.getKey().toString().equals("0")) {
+                nickName = (String) entry.getValue();
+            }
             key = Long.parseLong(entry.getKey().toString());
-            value = entry.getValue().toString();
+            role = entry.getValue().toString();
         }
-        MemberInfoResponseDto memberInfoResponseDto = new MemberInfoResponseDto(key, value);
+        MemberInfoResponseDto memberInfoResponseDto = new MemberInfoResponseDto(key, nickName, role);
         return ResponseEntity.ok(memberInfoResponseDto);
     }
 
     @GetMapping("/refreshToken")
-    public ResponseEntity<?> refreshAccessToken(@CookieValue(name = "refreshToken") String refreshToken, HttpServletResponse response) {
+    public ResponseEntity<?> refreshAccessToken(@CookieValue(name = "refreshToken") String refreshToken,
+//                                                @RequestHeader("X-Customer-Id") String customerId,
+//                                                @RequestHeader("X-Customer-Role") String customerRole,
+                                                HttpServletResponse response) {
         // 이전 토큰 삭제
         // jti 값을 이용해서 redis 에서 정보를 조회함
         String previousJti = jwtTokenProvider.getJti(refreshToken);
