@@ -29,7 +29,7 @@ public class MemberLoginFailureHandler extends SimpleUrlAuthenticationFailureHan
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
 
         // ErrorDto 생성 (예시: BadCredentialsException의 경우)
-        ErrorDto errorDto = new ErrorDto(HttpStatus.UNAUTHORIZED, "Unauthorized", exception.getMessage());
+        ErrorDto errorDto = new ErrorDto(HttpStatus.UNAUTHORIZED.value(), "Unauthorized", exception.getMessage());
 
         // ErrorDto를 JSON으로 응답
         objectMapper.writeValue(response.getWriter(), errorDto);

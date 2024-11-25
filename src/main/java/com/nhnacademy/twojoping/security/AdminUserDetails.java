@@ -40,4 +40,9 @@ public class AdminUserDetails implements UserDetailsWithId {
     public Long getId() {
         return admin.getAdminId();
     }
+
+    @Override
+    public String getNickName() {
+        return "admin";
+    }
 }

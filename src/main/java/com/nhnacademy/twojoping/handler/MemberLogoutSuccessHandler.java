@@ -28,10 +28,10 @@ public class MemberLogoutSuccessHandler implements LogoutSuccessHandler {
 
         // 쿠키에서 토큰 추출
         List<String> tokens = jwtTokenProvider.resolveToken(request);
-        String accessToken = tokens.get(0);
+        String refreshToken = tokens.get(1);
 
         // redis  정보삭제
-        redisTemplate.delete(jwtTokenProvider.getJti(accessToken));
+        redisTemplate.delete(jwtTokenProvider.getJti(refreshToken));
 
         // 쿠키 삭제
         Cookie cookie = new Cookie("accessToken", null);

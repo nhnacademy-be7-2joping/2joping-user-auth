@@ -69,7 +69,8 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.addCookie(refreshCookie);
 
         //redis 매칭저장
-        keyMap.put(String.valueOf(id), role);
+        keyMap.put(String.valueOf(0), userDetails.getNickName()); // 이름
+        keyMap.put(String.valueOf(id), role); // 권한
         redisTemplate.opsForHash().putAll(jti, keyMap);
         redisTemplate.expire(jti, Duration.ofMillis(refreshTokenValidityInMilliseconds));
 
