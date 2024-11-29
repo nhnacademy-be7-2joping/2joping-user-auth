@@ -1,7 +1,6 @@
 package com.nhnacademy.twojoping.client;
 
 import com.nhnacademy.twojoping.dto.response.SecretResponseDto;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
