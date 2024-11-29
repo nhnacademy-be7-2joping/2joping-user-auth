@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
@@ -45,6 +46,10 @@ public class JsonLoginRequestFilter extends UsernamePasswordAuthenticationFilter
         }
 
         return super.attemptAuthentication(request, response);
+    }
+    @Override
+    public void setAuthenticationFailureHandler(AuthenticationFailureHandler failureHandler) {
+        super.setAuthenticationFailureHandler(failureHandler); // 실패 시 핸들러 설정
     }
 
 }
