@@ -4,7 +4,6 @@ import com.nhnacademy.twojoping.dto.response.MemberInfoResponseDto;
 import com.nhnacademy.twojoping.exception.InvalidRefreshToken;
 import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
