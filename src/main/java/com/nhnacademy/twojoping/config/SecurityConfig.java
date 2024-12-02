@@ -1,6 +1,7 @@
 package com.nhnacademy.twojoping.config;
 
 import com.nhnacademy.twojoping.filter.JsonLoginRequestFilter;
+import com.nhnacademy.twojoping.handler.CustomAuthenticationFailureHandler;
 import com.nhnacademy.twojoping.handler.MemberLoginFailureHandler;
 import com.nhnacademy.twojoping.handler.MemberLoginSuccessHandler;
 import com.nhnacademy.twojoping.handler.MemberLogoutSuccessHandler;
@@ -31,6 +32,7 @@ public class SecurityConfig {
     private final MemberLoginFailureHandler memberLoginFailureHandler;
     private final MemberLoginSuccessHandler memberLoginSuccessHandler;
     private final MemberLogoutSuccessHandler memberLogoutSuccessHandler;
+    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler; // 새 핸들러
     private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
@@ -52,6 +54,7 @@ public class SecurityConfig {
         jsonLoginRequestFilter.setAuthenticationManager(manager);
         jsonLoginRequestFilter.setAuthenticationSuccessHandler(memberLoginSuccessHandler);
         jsonLoginRequestFilter.setAuthenticationFailureHandler(memberLoginFailureHandler);
+        jsonLoginRequestFilter.setAuthenticationFailureHandler(customAuthenticationFailureHandler);
         http.addFilterBefore(jsonLoginRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         // JwtAuthenticationFilter

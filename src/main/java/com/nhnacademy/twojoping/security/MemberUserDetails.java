@@ -42,5 +42,17 @@ public class MemberUserDetails implements UserDetailsWithId {
     }
 
     @Override
-    public String getNickName() { return member.getNickname(); }
+    public boolean isAccountNonLocked() {
+
+        return member.getMemberStatus().getId() != 2;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        // 가입(1) 상태만 활성화
+        return member.getMemberStatus().getId() != 1;
+    }
+    @Override
+    public String getNickName() { return member.getNickname();
+    }
 }
