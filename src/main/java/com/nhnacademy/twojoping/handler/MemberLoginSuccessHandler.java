@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.twojoping.common.security.UserDetailsWithId;
 import com.nhnacademy.twojoping.dto.response.LoginResponseDto;
 import com.nhnacademy.twojoping.security.provider.JwtTokenProvider;
-import io.jsonwebtoken.Jwts;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +39,7 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                                         Authentication authentication) throws IOException {
         // 성공 시에는 사용자의 정보를 가져온다.
         UserDetailsWithId userDetails = (UserDetailsWithId) authentication.getPrincipal();
+        String nickName = userDetails.getNickName();
         long id = userDetails.getId();
         String role = userDetails.getAuthorities().toArray()[0].toString();
         Map<String, String> keyMap = new HashMap<>();
@@ -50,23 +48,23 @@ public class MemberLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         // JWT 토큰 발급후 쿠키에 추가
         // 액세스 토큰
-        String accessToken = jwtTokenProvider.generateAccessToken();
+        String accessToken = jwtTokenProvider.generateAccessToken(id, role, nickName);
         Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
         accessTokenCookie.setHttpOnly(true);
         accessTokenCookie.setSecure(false);
         accessTokenCookie.setPath("/");
         response.addCookie(accessTokenCookie);
 
-        // JTI 추출
-        String jti = jwtTokenProvider.getJti(accessToken);
-
         // 리프레시 토큰
-        String refreshToken = jwtTokenProvider.generateRefreshToken(jti);
+        String refreshToken = jwtTokenProvider.generateRefreshToken();
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);
         refreshCookie.setSecure(false);
         refreshCookie.setPath("/");
         response.addCookie(refreshCookie);
+
+        // JTI 추출
+        String jti = jwtTokenProvider.getJti(refreshToken);
 
         //redis 매칭저장
         keyMap.put(String.valueOf(0), userDetails.getNickName()); // 이름

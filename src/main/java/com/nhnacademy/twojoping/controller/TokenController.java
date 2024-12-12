@@ -31,45 +31,49 @@ public class TokenController {
     @GetMapping("/user-info")
     public ResponseEntity<MemberInfoResponseDto> getUserInfo(@CookieValue(name = "accessToken") String accessToken) {
         // jti 값을 이용해서 redis 에서 정보를 조회함
-        String jti = jwtTokenProvider.getJti(accessToken);
-        Map<Object, Object> map = redisTemplate.opsForHash().entries(jti);
+//        String jti = jwtTokenProvider.getJti(accessToken);
+//        Map<Object, Object> map = redisTemplate.opsForHash().entries(jti);
 
-        // response
-        String nickName = null;
-        long key = 0;
-        String role = null;
-        for (Map.Entry<Object, Object> entry : map.entrySet()) {
-            if (entry.getKey().toString().equals("0")) {
-                nickName = (String) entry.getValue();
-            }
-            key = Long.parseLong(entry.getKey().toString());
-            role = entry.getValue().toString();
-        }
-        MemberInfoResponseDto memberInfoResponseDto = new MemberInfoResponseDto(key, nickName, role);
+//        // response
+//        String nickName = null;
+//        long customerId = 0;
+//        String role = null;
+//        for (Map.Entry<Object, Object> entry : map.entrySet()) {
+//            if (entry.getKey().toString().equals("0")) {
+//                nickName = (String) entry.getValue();
+//            }
+//            key = Long.parseLong(entry.getKey().toString());
+//            role = entry.getValue().toString();
+//        }
+        long customerId = jwtTokenProvider.getCustomerId(accessToken);
+        String nickName = jwtTokenProvider.getNickName(accessToken);
+        String role = jwtTokenProvider.getRole(accessToken);
+        MemberInfoResponseDto memberInfoResponseDto = new MemberInfoResponseDto(customerId, nickName, role);
         return ResponseEntity.ok(memberInfoResponseDto);
     }
 
     @GetMapping("/refreshToken")
     public ResponseEntity<?> refreshAccessToken(@CookieValue(name = "refreshToken") String refreshToken,
-//                                                @RequestHeader("X-Customer-Id") String customerId,
-//                                                @RequestHeader("X-Customer-Role") String customerRole,
                                                 HttpServletResponse response) {
         // 이전 토큰 삭제
         // jti 값을 이용해서 redis 에서 정보를 조회함
-        String previousJti = jwtTokenProvider.getJti(refreshToken);
-        Map<Object, Object> map = redisTemplate.opsForHash().entries(previousJti);
-        redisTemplate.delete(previousJti);
-
-        // 새로운 Jti
-        String newJti = "";
+        String jti = jwtTokenProvider.getJti(refreshToken);
+        Map<Object, Object> map = redisTemplate.opsForHash().entries(jti);
+        String nickName = "";
+        long customerId = 0;
+        String role = "";
+        for (Map.Entry<Object, Object> entry : map.entrySet()) {
+            if (!entry.getKey().toString().equals("0")) {
+                customerId = Long.parseLong(entry.getKey().toString());
+                role = entry.getValue().toString();
+            } else {
+                nickName = (String) entry.getValue();
+            }
+        }
 
         // refreshToken 쿠키 검증후 accessToken 쿠키 재발급, invalid token 이면 예외처리
         if (jwtTokenProvider.validateToken(refreshToken) && refreshToken != null) {
-            String newAccessToken = jwtTokenProvider.generateAccessToken();
-            newJti = jwtTokenProvider.getJti(newAccessToken);
-            String newRefreshToken = jwtTokenProvider.reGenerateRefreshToken(
-                    newJti,
-                    jwtTokenProvider.getRemainingExpirationTime(refreshToken));
+            String newAccessToken = jwtTokenProvider.generateAccessToken(customerId, role, nickName);// 파라미터 추가할 것.
 
             // accessToken 재발급
             Cookie accessCookie = new Cookie("accessToken", newAccessToken);
@@ -77,15 +81,6 @@ public class TokenController {
             accessCookie.setSecure(false);
             accessCookie.setPath("/");
             response.addCookie(accessCookie);
-
-            // refreshToken 재발급
-            Cookie refreshCookie = new Cookie("refreshToken", newRefreshToken);
-            refreshCookie.setHttpOnly(true);
-            refreshCookie.setSecure(false);
-            refreshCookie.setPath("/");
-            response.addCookie(refreshCookie);
-
-            redisTemplate.opsForHash().putAll(newJti, map);
 
             return ResponseEntity.ok().build();
         }

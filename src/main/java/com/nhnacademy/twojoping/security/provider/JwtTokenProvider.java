@@ -64,7 +64,8 @@ public class JwtTokenProvider {
      *
      * @return 생성된 JWT 토큰 문자열
      */
-    public String generateAccessToken() {
+    // add nickname, role, customerId
+    public String generateAccessToken(long customerId, String role, String nickName) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + accessTokenValidity);
 
@@ -78,6 +79,9 @@ public class JwtTokenProvider {
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .setId(UUID.randomUUID().toString())
+                .setSubject(nickName)
+                .claim("role", role)
+                .claim("customerId", customerId)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -85,10 +89,9 @@ public class JwtTokenProvider {
     /**
      * 인증 정보 기반으로 JWT 리프레시 토큰 발급
      *
-     * @param jti access token 의 jti
      * @return 생성된 refresh token
      */
-    public String generateRefreshToken(String jti) {
+    public String generateRefreshToken() {
         Date now = new Date();
         Date validity = new Date(now.getTime() + refreshTokenValidity);
 
@@ -101,7 +104,7 @@ public class JwtTokenProvider {
                 .setHeader(header)
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .setId(jti)
+                .setId(UUID.randomUUID().toString())
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -183,6 +186,35 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody()
                 .getId();
+    }
+
+    public String getNickName(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
+    public String getRole(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role")
+                .toString();
+    }
+
+    public long getCustomerId(String token) {
+        return Long.parseLong(Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("customerId")
+                .toString());
     }
 
     /**
